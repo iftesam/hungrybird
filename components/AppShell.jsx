@@ -72,7 +72,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 {/* User Footer */}
                 <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
-                        <img src={prefixPath('/images/Iftesam-Nabi.png')} alt="User" className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
+                        <img src={prefixPath('/images/iftesam-nabi.png')} alt="User" className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">Iftesam Nabi</p>
                             <p className="text-xs text-gray-500 truncate">Pro Member</p>
