@@ -4,6 +4,7 @@ import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { prefixPath } from '@/utils/prefix';
 import { CuisineSelector } from "@/components/CuisineSelector";
 import { SmartAllowance } from "@/components/SmartAllowance";
 import { NutritionalStrategy } from "@/components/NutritionalStrategy";
@@ -340,7 +341,7 @@ export const ProfileView = () => {
                         <div className="flex flex-col items-center text-center relative z-10">
                             <div className="relative">
                                 <div className="w-32 h-32 rounded-full mb-6 p-1 border-2 border-dashed border-gray-200 group-hover:border-gray-400 transition-colors cursor-pointer">
-                                    <img src="/images/Iftesam-Nabi.png" alt="Profile" className="w-full h-full object-cover rounded-full shadow-sm" />
+                                    <img src={prefixPath('/images/Iftesam-Nabi.png')} alt="Profile" className="w-full h-full object-cover rounded-full shadow-sm" />
                                 </div>
                                 {/* Edit Icon hidden if locked by parent pointer-events-none, but visually we can hide it too */}
                                 <div className="absolute bottom-4 right-0 bg-white p-2 rounded-full shadow-md border border-gray-100 text-gray-600 hover:text-black hover:scale-110 transition-all cursor-pointer">

@@ -42,7 +42,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                         className="flex items-center gap-3 cursor-pointer group"
                         title="Reload HungryBird"
                     >
-                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo.png`} alt="HungryBird Logo" className="h-10 w-auto group-hover:scale-105 transition-transform" />
+                        <img src={prefixPath('/logo.png')} alt="HungryBird Logo" className="h-10 w-auto group-hover:scale-105 transition-transform" />
                         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-600 hidden md:block group-hover:opacity-80 transition-opacity">
                             HungryBird
                         </span>
@@ -71,7 +71,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 {/* User Footer */}
                 <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
-                        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/images/Iftesam-Nabi.png`} alt="User" className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
+                        <img src={prefixPath('/images/Iftesam-Nabi.png')} alt="User" className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">Iftesam Nabi</p>
                             <p className="text-xs text-gray-500 truncate">Pro Member</p>
