@@ -164,17 +164,8 @@ export const HistoryView = () => {
             </div>
 
             {/* Summary Layer */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                    {
-                        label: "Total Invested",
-                        value: `$${stats.totalSpent.toLocaleString()}`,
-                        icon: DollarSign,
-                        color: "text-blue-600",
-                        bg: "bg-blue-500/5",
-                        accent: "bg-blue-50",
-                        desc: "Lifetime Spending"
-                    },
                     {
                         label: "Avg per Meal",
                         value: `$${stats.avgMeal.toFixed(2)}`,
