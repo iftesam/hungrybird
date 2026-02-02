@@ -61,8 +61,13 @@ export const RestaurantPreference = () => {
     const isWildcardActive = selected.includes("wildcard");
 
     return (
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="flex justify-between items-start mb-6">
+        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative group">
+            {/* Background Decoration */}
+            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-bl-[100px] -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+            </div>
+
+            <div className="flex justify-between items-start mb-6 relative z-10">
                 <div>
                     <h3 className="text-lg font-bold text-gray-900">Restaurant Preference</h3>
                     <p className="text-sm text-gray-500">Select multiple to diversify your weekly menu.</p>

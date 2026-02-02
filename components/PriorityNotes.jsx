@@ -38,9 +38,14 @@ export const PriorityNotes = () => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-black/5 border-white/40 h-full space-y-6"
+            className="glass-card p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-black/5 border-white/40 h-full space-y-6 relative group"
         >
-            <div className="flex items-center justify-between">
+            {/* Background Decoration - Wrapped to prevent tooltip clipping */}
+            <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+            </div>
+
+            <div className="flex items-center justify-between relative z-50">
                 <div className="flex items-center gap-3 text-gray-900 leading-none">
                     <div className="p-2 bg-amber-50 rounded-xl text-amber-600">
                         <StickyNote className="w-5 h-5" />

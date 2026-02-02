@@ -337,6 +337,7 @@ export const ScheduleView = () => {
             // Strategy: STRICT Value
             // Calculate minimum possible cost for the slots
             // If budget is tight, we shouldn't aim for 'average', we should aim for 'floor'
+            // AppProvider initializes cuisines with default.
 
             mealPrefs.forEach(type => {
                 // Find cheapest possible meal for this slot to start with
@@ -549,13 +550,14 @@ export const ScheduleView = () => {
     };
 
     return (
-        <div className="space-y-6 pb-20">
-            {/* Header / Date Navigator (State of the Art) */}
-            <div className="flex flex-col gap-4 bg-[#FAFAFA] py-2">
+
+        <div className="space-y-4 pb-20">
+            {/* Header Section */}
+            <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold tracking-tight text-gray-900">Schedule</h1>
                     <div className={cn(
-                        "px-3 py-1.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors",
+                        "px-3 py-1.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors shadow-sm",
                         isOverBudget
                             ? "bg-red-50 text-red-700 border-red-100"
                             : "bg-emerald-50 text-emerald-700 border-emerald-100"
@@ -565,135 +567,63 @@ export const ScheduleView = () => {
                     </div>
                 </div>
 
-                {/* Today's Date Display - State of the Art */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="relative overflow-hidden"
-                >
-                    <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-3xl p-6 shadow-2xl shadow-orange-500/20">
-                        {/* Animated shimmer effect */}
-                        <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                            animate={{
-                                x: ['-100%', '100%'],
-                            }}
-                            transition={{
-                                duration: 3,
-                                repeat: Infinity,
-                                ease: "linear"
-                            }}
-                        />
-
-                        {/* Decorative pattern overlay */}
-                        <div className="absolute inset-0 opacity-10">
-                            <div className="absolute top-2 left-4 w-20 h-20 border-2 border-white rounded-full" />
-                            <div className="absolute bottom-2 right-8 w-16 h-16 border-2 border-white rounded-full" />
-                            <div className="absolute top-1/2 right-1/4 w-12 h-12 border-2 border-white rounded-full" />
-                        </div>
-
-                        {/* Subtle glow orbs */}
-                        <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-300/20 rounded-full blur-3xl" />
-                        <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-red-300/20 rounded-full blur-3xl" />
-
-                        <div className="relative z-10 flex items-center justify-center gap-3">
-                            {/* "Today" label with pulse */}
-                            <motion.div
-                                animate={{
-                                    scale: [1, 1.05, 1],
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                                className="flex items-center gap-2"
-                            >
-                                <motion.div
-                                    className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-                                    animate={{
-                                        opacity: [1, 0.5, 1],
-                                    }}
-                                    transition={{
-                                        duration: 1.5,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                />
-                                <span className="text-sm font-bold text-white/90 uppercase tracking-widest drop-shadow-lg">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    {/* Today's Date Card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white rounded-2xl py-3 px-4 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.08)] border border-gray-100 flex-1"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
                                     Today
                                 </span>
-                            </motion.div>
+                            </div>
+                            <div className="w-px h-4 bg-gray-200" />
+                            <span className="text-base font-medium text-gray-900">
+                                {new Date().toLocaleDateString('en-US', {
+                                    month: 'long', day: 'numeric', year: 'numeric'
+                                }).replace(/(\d+)/, (match) => {
+                                    const num = parseInt(match);
+                                    const suffix = [1, 21, 31].includes(num) ? 'st' : [2, 22].includes(num) ? 'nd' : [3, 23].includes(num) ? 'rd' : 'th';
+                                    return `${num}${suffix}`;
+                                })}
+                            </span>
+                        </div>
+                    </motion.div>
 
-                            {/* Separator */}
-                            <div className="w-px h-6 bg-white/40" />
-
-                            {/* Full date with gradient text */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0, duration: 0.15 }}
-                            >
-                                <span className="text-lg md:text-xl font-bold text-white drop-shadow-lg">
-                                    {new Date().toLocaleDateString('en-US', {
-                                        month: 'long',
-                                        day: 'numeric',
-                                        year: 'numeric'
-                                    }).replace(/(\d+)/, (match) => {
-                                        const num = parseInt(match);
-                                        const suffix = [1, 21, 31].includes(num) ? 'st' : [2, 22].includes(num) ? 'nd' : [3, 23].includes(num) ? 'rd' : 'th';
-                                        return `${num}${suffix}`;
-                                    })}
+                    {/* Integrated Budget Indicator */}
+                    <motion.div
+                        className={cn(
+                            "hidden md:flex px-4 py-2 rounded-2xl border items-center gap-4 bg-white transition-all shadow-sm",
+                            mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] ? "border-emerald-100" : "border-gray-100"
+                        )}
+                    >
+                        <div className="flex flex-col leading-none">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Limit</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-lg font-bold text-gray-900">
+                                    ${(mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
                                 </span>
-                            </motion.div>
-
-                            {/* Smart Budget Indicator */}
-                            <div className="hidden md:flex ml-auto items-center gap-3">
-                                <div className="w-px h-6 bg-white/20" />
-                                <motion.div
-                                    className={cn(
-                                        "px-4 py-1.5 rounded-xl border flex items-center gap-2.5 backdrop-blur-md transition-all duration-500",
-                                        mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()]
-                                            ? "bg-emerald-500/20 border-emerald-400/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-                                            : "bg-white/10 border-white/20"
-                                    )}
-                                    whileHover={{ scale: 1.05 }}
-                                >
-                                    <div className="flex flex-col items-start leading-none">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white/60 mb-0.5">Daily Limit</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-xl font-black text-white">
-                                                ${(mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
-                                            </span>
-                                            {mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] && (
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Visual Budget Graph (Mini) */}
-                                    <div className="flex items-end gap-1 h-6 pt-1">
-                                        {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ height: 0 }}
-                                                animate={{ height: `${h * 100}%` }}
-                                                className="w-1 bg-white/30 rounded-full"
-                                                transition={{ delay: 0.5 + (i * 0.1) }}
-                                            />
-                                        ))}
-                                    </div>
-                                </motion.div>
+                                {mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] && (
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                )}
                             </div>
                         </div>
-                    </div>
-                </motion.div>
+                        <div className="flex items-end gap-1 h-5">
+                            {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
+                                <div key={i} className="w-1 bg-emerald-100 rounded-full" style={{ height: `${h * 100}%` }} />
+                            ))}
+                        </div>
+                    </motion.div>
+                </div>
             </div>
 
-            {/* Smart Processing Timer - All Processed State Only */}
+            {/* Status Banners */}
             {isAllOrdersLocked && (
-                <div className="bg-gray-900 text-white p-6 rounded-2xl shadow-xl shadow-gray-200/50 mb-6 flex items-center gap-4">
+                <div className="bg-gray-900 text-white p-5 rounded-2xl shadow-xl shadow-gray-200/50 flex items-center gap-4">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                     <div>
                         <h3 className="font-bold text-lg">All Orders Processed</h3>
@@ -701,18 +631,15 @@ export const ScheduleView = () => {
                     </div>
                 </div>
             )}
-            {/* Removed Old SmartTimer <SmartTimer ... /> */}
 
-            {/* Empty State / Warning */}
             {validMeals.length === 0 && (
                 <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
-                    No meals found matching your strict criteria. Try enabling "Wildcard".
+                    No meals found matching your profile.
                 </div>
             )}
 
-            {/* Smart Meal List (Responsive to mealPrefs) */}
-            <div className="space-y-8">
+            <div className="space-y-6">
                 <AnimatePresence>
                     {MEAL_ORDER.filter(type => mealPrefs.includes(type)).map((type, i) => {
                         const slotItems = items[type] || [];

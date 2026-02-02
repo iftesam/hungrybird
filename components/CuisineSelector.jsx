@@ -43,9 +43,14 @@ export const CuisineSelector = () => {
         .slice(0, 4);
 
     return (
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative group">
+            {/* Background Decoration */}
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[100px] -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+            </div>
+
             {/* Header with Dynamic Progress */}
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-6 relative z-10">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Globe className="w-5 h-5 text-emerald-500" />

@@ -99,7 +99,12 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                     animate={{ opacity: 1, x: 0 }}
                 >
                     <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
-                        Good morning, Iftesam!
+                        {(() => {
+                            const hour = new Date().getHours();
+                            if (hour >= 5 && hour < 12) return "Good morning, Iftesam!";
+                            if (hour >= 12 && hour < 17) return "Good afternoon, Iftesam!";
+                            return "Hungry evening, Iftesam!";
+                        })()}
                     </h1>
                     <p className="text-sm font-medium text-gray-500">
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -132,9 +137,14 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-card p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-black/5 border-white/40 h-full flex flex-col space-y-6"
+                    className="glass-card p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-black/5 border-white/40 h-full flex flex-col space-y-6 relative group"
                 >
-                    <div className="flex items-center justify-between">
+                    {/* Background Decoration - Wrapped to prevent tooltip clipping */}
+                    <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+                    </div>
+
+                    <div className="flex items-center justify-between relative z-50">
                         <div className="flex items-center gap-3 text-gray-900 leading-none">
                             <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
                                 <History className="w-5 h-5" />
@@ -268,9 +278,14 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="glass-card p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-black/5 border-white/40 space-y-8"
+                className="glass-card p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-black/5 border-white/40 space-y-8 relative group"
             >
-                <div className="flex items-center justify-between">
+                {/* Background Decoration - Wrapped to prevent clipping */}
+                <div className="absolute inset-0 rounded-[3rem] overflow-hidden pointer-events-none">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 rounded-bl-[140px] -mr-8 -mt-8 transition-transform group-hover:scale-105" />
+                </div>
+
+                <div className="flex items-center justify-between relative z-50">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
                             <Package className="w-6 h-6" />
@@ -362,7 +377,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                 </div>
             </motion.div>
 
-            {/* ROW 5: Analytics (Buying Power & Fuel) */}
+            {/* ROW 5: Analytics (Daily Buying Power & Fuel) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 {/* Today's Avg per Meal */}
                 <motion.div
@@ -392,21 +407,6 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                                     <span className="text-4xl md:text-5xl font-black tracking-tighter text-gray-900">${avgPerMeal.toFixed(2)}</span>
                                     <span className="text-sm font-bold text-gray-400">/ meal</span>
                                 </div>
-
-                                {/* Visual Progress Bar */}
-                                <div className="space-y-2">
-                                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(percentage, 100)}%` }}
-                                            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
-                                        />
-                                    </div>
-                                    <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                        <span>Efficient</span>
-                                        <span>Premium</span>
-                                    </div>
-                                </div>
                             </div>
                         );
                     })()}
@@ -422,7 +422,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             <div className="p-2 bg-orange-50 rounded-xl text-orange-600">
                                 <CreditCard className="w-5 h-5" />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-wider">Buying Power</span>
+                            <span className="text-sm font-bold uppercase tracking-wider">Daily Buying Power</span>
                         </div>
                         <div className="flex items-center gap-1 bg-orange-100 px-2 py-0.5 rounded text-[10px] font-bold text-orange-700">
                             <Zap className="w-3 h-3 fill-current" />

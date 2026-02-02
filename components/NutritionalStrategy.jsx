@@ -53,8 +53,13 @@ export const NutritionalStrategy = ({ onAccessDenied }) => {
     const onUpdate = (id) => actions.updateProfile({ nutritionalStrategy: id });
 
     return (
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="mb-6">
+        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative group">
+            {/* Background Decoration */}
+            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[100px] -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+            </div>
+
+            <div className="mb-6 relative z-10">
                 <h3 className="text-lg font-bold text-gray-900">Nutritional Strategy</h3>
                 <p className="text-sm text-gray-500">Tell RouxBot your primary biological objective.</p>
             </div>
