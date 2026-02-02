@@ -85,7 +85,6 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                             <p className="text-sm font-bold text-gray-900 truncate">Iftesam Nabi</p>
                             <p className="text-xs text-gray-500 truncate">Pro Member</p>
                         </div>
-                        <Bell className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-colors" />
                     </div>
                 </div>
             </aside>
