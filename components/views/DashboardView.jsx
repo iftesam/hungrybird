@@ -174,9 +174,37 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">Help our system learn your taste buds!</span>
                         </div>
                         <p className="text-[11px] text-gray-500 leading-snug">
-                            Your feedback helps us schedule meals you'll love.
+                            Your feedback directly influences your schedule—favorites are prioritized, and dislikes never appear.
                         </p>
                     </div>
+
+                    {/* Sync Status Banner */}
+                    {(() => {
+                        const favoriteCount = Object.values(reviews).filter(r => r.isFavorite).length;
+                        const dislikeCount = Object.values(reviews).filter(r => r.liked === false).length;
+
+                        if (favoriteCount === 0 && dislikeCount === 0) return null;
+
+                        return (
+                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex items-center justify-center gap-3">
+                                {favoriteCount > 0 && (
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-purple-700">
+                                        <Heart className="w-3.5 h-3.5 fill-current" />
+                                        <span>{favoriteCount} {favoriteCount === 1 ? 'favorite' : 'favorites'} prioritized</span>
+                                    </div>
+                                )}
+                                {favoriteCount > 0 && dislikeCount > 0 && (
+                                    <div className="w-px h-4 bg-purple-200" />
+                                )}
+                                {dislikeCount > 0 && (
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-600">
+                                        <ThumbsDown className="w-3.5 h-3.5" />
+                                        <span>{dislikeCount} {dislikeCount === 1 ? 'dislike' : 'dislikes'} avoided</span>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
 
                     {/* Review List (Last 5 orders) */}
                     {unreviewedMeals.length > 0 ? (

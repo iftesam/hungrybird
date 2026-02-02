@@ -70,7 +70,7 @@ export const PriorityNotes = () => {
                                             </p>
                                             <div className="h-px bg-white/10 w-full" />
                                             <p className="text-xs leading-relaxed font-light text-gray-300">
-                                                Once approved, these notes become <span className="font-bold text-white">Hard Constraints</span>—meaning they are locked into your schedule before anything else.
+                                                Once approved, these notes become <span className="font-bold text-white">Hard Constraints</span>—meaning they are locked into your schedule before anything else. The system will consider your review preferences when fulfilling these requests.
                                             </p>
                                         </div>
                                     </div>

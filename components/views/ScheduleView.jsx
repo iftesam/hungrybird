@@ -42,7 +42,7 @@ import { MealCard } from "@/components/MealCard";
 
 
 export const ScheduleView = () => {
-    const { profile, cuisines, mealPrefs, restaurantPrefs, financials, addresses, skipped, actions, deliverySchedule, mealPlan, isLoaded, isConfigured, missingConfig, priorityNotes } = useAppContext();
+    const { profile, cuisines, mealPrefs, restaurantPrefs, financials, addresses, skipped, actions, deliverySchedule, mealPlan, isLoaded, isConfigured, missingConfig, priorityNotes, reviews } = useAppContext();
 
     if (!isLoaded) return null; // Wait for hydration
 
@@ -119,7 +119,10 @@ export const ScheduleView = () => {
         if (cuisines.length === 0) return MEALS;
 
         return MEALS.filter(meal => {
-            // 1. Cuisine Check
+            // 1. Review Check - Exclude Disliked Meals
+            if (reviews[meal.name]?.liked === false) return false;
+
+            // 2. Cuisine Check
             const activeCuisines = cuisines.map(c => CUISINE_MAP[c]);
             // Check both strict cuisine field and tags for flexibility
             // We use optional chaining and strict matching
@@ -128,7 +131,7 @@ export const ScheduleView = () => {
             );
             if (!matchesCuisine) return false;
 
-            // 2. Strict Dietary & Allergy Check
+            // 3. Strict Dietary & Allergy Check
 
             // A. Allergies (MUST NOT contain)
             if (profile.allergies && profile.allergies.length > 0) {
@@ -146,7 +149,7 @@ export const ScheduleView = () => {
             if (profile.diet.includes("Keto") && !meal.tags.includes("Keto-Friendly")) return false;
             if (profile.diet.includes("Spicy") && !meal.tags.includes("Spicy")) return false;
 
-            // 3. Restaurant Preference Check
+            // 4. Restaurant Preference Check
             const hasWildcard = restaurantPrefs.includes("wildcard");
             if (!hasWildcard) {
                 const matchesTier = restaurantPrefs.some(pref => {
@@ -159,7 +162,7 @@ export const ScheduleView = () => {
 
             return true;
         });
-    }, [profile, cuisines, restaurantPrefs]);
+    }, [profile, cuisines, restaurantPrefs, reviews]);
 
     const { updateMealPlan, toggleSkip } = actions;
 
@@ -245,6 +248,16 @@ export const ScheduleView = () => {
         const sortedPool = [...validMeals].sort((a, b) => a.price - b.price);
 
         // Helper: Get best meal for a target price with some variety
+        // Now with Review-Aware Scoring!
+        const getMealScore = (meal) => {
+            const review = reviews[meal.name];
+            if (!review) return 1; // Base score for unreviewed
+            if (review.isFavorite) return 10; // Highest priority
+            if (review.liked === true) return 5; // Medium priority
+            if (review.liked === false) return 0; // Should be filtered out already
+            return 1;
+        };
+
         const pickMeal = (type, targetPrice, variance = 5) => {
             // 1. Try Strict Match in Filtered Pool (Cuisine + Time + Price)
             let candidates = sortedPool.filter(m =>
@@ -263,6 +276,8 @@ export const ScheduleView = () => {
                 // We need to re-apply basic diet filters to the global list for safety
                 candidates = MEALS.filter(m => {
                     if (!m.meal_time.includes(type)) return false;
+                    // Exclude dislikes
+                    if (reviews[m.name]?.liked === false) return false;
 
                     // Re-run basic diet checks from the main filter
                     // (We can assume if they weren't in sortedPool, it was due to Cuisine or Diet)
@@ -285,7 +300,25 @@ export const ScheduleView = () => {
             // 4. Critical Fail-safe: Just return null if truly nothing exists (should be impossible with rich data)
             if (candidates.length === 0) return null;
 
-            // Randomize slightly from top results to avoid repetition
+            // 5. REVIEW-AWARE SELECTION
+            // First, try to find favorites that fit the budget
+            const favorites = candidates.filter(m => reviews[m.name]?.isFavorite);
+            if (favorites.length > 0) {
+                // Sort favorites by price proximity
+                favorites.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
+                const limit = Math.min(favorites.length, 3);
+                return favorites[Math.floor(Math.random() * limit)];
+            }
+
+            // Next, try liked meals
+            const liked = candidates.filter(m => reviews[m.name]?.liked === true);
+            if (liked.length > 0) {
+                liked.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
+                const limit = Math.min(liked.length, 5);
+                return liked[Math.floor(Math.random() * limit)];
+            }
+
+            // Finally, fall back to unreviewed meals
             // Sort by price proximity to target first
             candidates.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
 
@@ -448,7 +481,7 @@ export const ScheduleView = () => {
             items: newSchedule,
             meta: { budget: maxPreTaxTotal }
         });
-    }, [mealPrefs, validMeals, TARGET_DAILY, mealPlan.meta?.budget, isLoaded, priorityNotes]);
+    }, [mealPrefs, validMeals, TARGET_DAILY, mealPlan.meta?.budget, isLoaded, priorityNotes, reviews]);
 
     // Calculate Active Total (Excluding Skipped & Past Cutoff)
     // Smart Logic: If the meal time has passed ("I didn't order"), it removes from the *Plan* total to show remaining liability.
