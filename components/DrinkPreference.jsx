@@ -12,10 +12,10 @@ function cn(...inputs) { return twMerge(clsx(inputs)); }
 const DRINK_OPTIONS = [
     { id: "coke", label: "Coca-Cola", color: "#2E0905", highlight: "#4A1A17", flavor: "Classic", icon: "🥤" },
     { id: "pepsi", label: "Pepsi", color: "#004B93", highlight: "#0066CC", flavor: "Sweet", icon: "🔵" },
-    { id: "fanta", label: "Fanta", color: "#FF7300", highlight: "#FFA500", flavor: "Orange", icon: "🍊" },
+    { id: "diet-coke", label: "Diet Coke", color: "#1A1A1A", highlight: "#404040", flavor: "Zero Sugar", icon: "✨" },
     { id: "sprite", label: "Sprite", color: "#008F47", highlight: "#00BF60", flavor: "Lemon Lime", icon: "🍋" },
     { id: "drpepper", label: "Dr Pepper", color: "#541016", highlight: "#802029", flavor: "Spiced", icon: "🌶️" },
-    { id: "water", label: "Water", color: "#0EA5E9", highlight: "#7DD3FC", flavor: "Pure", icon: "💧" }
+    { id: "fanta", label: "Fanta", color: "#FF7300", highlight: "#FFA500", flavor: "Orange", icon: "🍊" }
 ];
 
 export const DrinkPreference = () => {
