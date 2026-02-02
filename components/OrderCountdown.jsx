@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Timer, Settings2, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap } from "lucide-react";
+import { Timer, Calendar, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap } from "lucide-react";
+
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { twMerge } from "tailwind-merge";
@@ -139,22 +140,25 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
                     </div>
 
                     {/* Right Section: Action */}
-                    <div className="flex items-center justify-center lg:justify-end">
-                        <button
-                            onClick={onAdjust}
-                            className={cn(
-                                "flex items-center gap-2 px-6 py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-md hover:shadow-lg",
-                                isUrgent
-                                    ? "bg-red-600 text-white hover:bg-red-700 shadow-red-500/20"
-                                    : "bg-white text-gray-900 border border-gray-100 hover:bg-gray-50"
-                            )}
-                        >
-                            <Settings2 className="w-3.5 h-3.5" />
-                            Settings
-                            <ChevronRight className="w-3.5 h-3.5 opacity-40" />
-                        </button>
-                    </div>
+                    {onAdjust && (
+                        <div className="flex items-center justify-center lg:justify-end">
+                            <button
+                                onClick={onAdjust}
+                                className={cn(
+                                    "flex items-center gap-2 px-6 py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-md hover:shadow-lg",
+                                    isUrgent
+                                        ? "bg-red-600 text-white hover:bg-red-700 shadow-red-500/20"
+                                        : "bg-white text-gray-900 border border-gray-100 hover:bg-gray-50"
+                                )}
+                            >
+                                <Calendar className="w-3.5 h-3.5" />
+                                Schedule
+                                <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                            </button>
+                        </div>
+                    )}
                 </div>
+
 
                 {/* Footer Info Area */}
                 <div className="mt-6 flex items-center justify-center md:justify-start gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-black/5 w-fit px-3 py-1.5 rounded-full mx-auto md:mx-0">
