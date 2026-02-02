@@ -12,12 +12,13 @@ const INITIAL_PROFILE = {
     phone: "+1 318 000 0000",
     address: "123 Tech Lane, San Francisco, CA",
     diet: [],
-    allergies: [],
+    allergies: ["Pork"], // Pork excluded (capitalized to match DietaryPreferences component)
     notes: "",
     nutritionalStrategy: "hypertrophy", // Muscle Gain
-    drinkPrefs: [],
-    dailyAllowance: 60,
-    recurrence: { isActive: true, days: 7 },
+    drinkPrefs: ["coca-cola", "pepsi", "diet-coke", "sprite", "fanta"], // Selected drinks
+    ice: true, // Ice selected
+    dailyAllowance: 60, // $60 daily allowance
+    recurrence: { isActive: true, days: 7 }, // 7-day recurring frequency
     healthConnected: false
 };
 
@@ -28,7 +29,7 @@ const INITIAL_FINANCIALS = {
     spent: 840.00 // Approx 14 days * 60
 };
 
-const INITIAL_CUISINES = ["us", "in", "jp", "mx", "th"]; // Current setting is good
+const INITIAL_CUISINES = ["us", "mx", "jp", "in", "kr", "pk", "bd"]; // American, Mexican, Japanese, Indian, Korean, Pakistani, Bangladeshi
 
 const INITIAL_ADDRESSES = [
     {
@@ -60,8 +61,8 @@ const INITIAL_ADDRESSES = [
     }
 ];
 
-const INITIAL_MEAL_PREFS = ["breakfast", "lunch", "dinner"];
-const INITIAL_RESTAURANT_PREFS = ["top_tier"];
+const INITIAL_MEAL_PREFS = ["breakfast", "lunch", "dinner"]; // All 3 meals selected
+const INITIAL_RESTAURANT_PREFS = ["top_tier", "cohort", "fresh", "gems"]; // 4 selected, excluding The Rouxlette (wildcard)
 
 import { MEALS, CUISINE_MAP } from "@/data/meals";
 import { findSmartSwap } from "@/utils/SwapLogistics";
@@ -73,12 +74,40 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const WEEKENDS = ["Sat", "Sun"];
 
+// Default Priority Notes
+// Using static timestamps to avoid hydration errors (server/client mismatch)
+const INITIAL_PRIORITY_NOTES = [
+    {
+        id: 1738467600000, // Static ID
+        text: "Get us in Y Combinator!",
+        status: "declined",
+        createdAt: "2026-02-01T23:00:00.000Z", // Static timestamp
+        expiresAt: null, // Infinity
+        durationLabel: "Infinity",
+        rejectionReason: "Invalid Request: Please specify a meal-related request. Example: \"I want pizza for dinner\" or \"Give me tacos for lunch tomorrow.\"",
+    },
+    {
+        id: 1738467601000, // Static ID
+        text: "I want a spicy beef burger for dinner tomorrow.",
+        status: "approved",
+        createdAt: "2026-02-01T23:00:00.000Z", // Static timestamp
+        expiresAt: "2026-02-04T23:00:00.000Z", // Static expiry (3 days later)
+        durationLabel: "3 Days",
+        tags: {
+            target: "Tomorrow's Dinner",
+            cuisine: "Custom Request"
+        },
+        logic: null
+    }
+];
+
 // Populate Schedule
 DAYS.forEach(day => {
-    // Weekday Logic
+    // Weekday Logic - Office for breakfast/lunch, Home for dinner
     if (WEEKDAYS.includes(day)) {
-        INITIAL_SCHEDULE[`${day}_breakfast`] = { locationId: "addr-campus", time: "08:00" };
-        INITIAL_SCHEDULE[`${day}_lunch`] = { locationId: "addr-office", time: "12:30" };
+        INITIAL_SCHEDULE[`${day}_breakfast`] = { locationId: "addr-office", time: "08:30" };
+        const lunchTime = day === "Fri" ? "12:00" : "13:00"; // Friday 12-1pm, rest 1-2pm
+        INITIAL_SCHEDULE[`${day}_lunch`] = { locationId: "addr-office", time: lunchTime };
         INITIAL_SCHEDULE[`${day}_dinner`] = { locationId: "addr-home", time: "19:30" };
     } else {
         // Weekend Logic (All Home)
@@ -99,7 +128,7 @@ export const AppProvider = ({ children }) => {
     const [restaurantPrefs, setRestaurantPrefs] = useState(INITIAL_RESTAURANT_PREFS);
     const [skipped, setSkipped] = useState([]); // Moved up to avoid ReferenceError
     const [reviews, setReviews] = useState({}); // Stores user feedback { [mealName]: { liked, isFavorite } }
-    const [priorityNotes, setPriorityNotes] = useState([]);
+    const [priorityNotes, setPriorityNotes] = useState(INITIAL_PRIORITY_NOTES);
 
 
 
