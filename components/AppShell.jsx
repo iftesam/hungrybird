@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { prefixPath } from '@/utils/prefix';
 import {
     LayoutDashboard,
@@ -11,7 +11,7 @@ import {
     ChevronRight,
     Linkedin
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -24,6 +24,25 @@ export const AppLayout = ({ children }) => {
     const pathname = usePathname();
     const router = useRouter();
     const [showNotification, setShowNotification] = useState(false);
+
+    // Scroll-to-hide logic for mobile
+    const scrollRef = useRef(null);
+    const { scrollY } = useScroll({ container: scrollRef });
+    const [isHidden, setIsHidden] = useState(false);
+
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const previous = scrollY.getPrevious() || 0;
+        if (latest > previous && latest > 150) {
+            setIsHidden(true);
+        } else {
+            setIsHidden(false);
+        }
+    });
+
+    // Re-show on route change
+    useEffect(() => {
+        setIsHidden(false);
+    }, [pathname]);
 
     const NAV_ITEMS = [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -96,7 +115,10 @@ export const AppLayout = ({ children }) => {
 
             {/* --- MAIN CONTENT AREA --- */}
             <main className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative pb-24 md:pb-0">
-                <header className="h-16 border-b border-gray-200/50 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-[1000]">
+                <header className={cn(
+                    "h-16 border-b border-gray-200/50 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 transition-transform duration-300 z-[1000]",
+                    isHidden && "md:translate-y-0 -translate-y-full"
+                )}>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="md:hidden">
                             <img src={prefixPath('/logo.png')} alt="Logo" className="h-8 w-auto" />
@@ -170,7 +192,10 @@ export const AppLayout = ({ children }) => {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
+                <div
+                    ref={scrollRef}
+                    className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide"
+                >
                     <AnimatePresence mode="wait" initial={false}>
                         {/* FIX 3: THE GOLDEN FIX. Use pathname as the key. */}
                         <motion.div
@@ -192,7 +217,15 @@ export const AppLayout = ({ children }) => {
             </main>
 
             {/* Mobile Nav */}
-            <div className="md:hidden fixed bottom-6 left-6 right-6 h-18 z-50">
+            <motion.div
+                initial={false}
+                animate={{
+                    y: isHidden ? 100 : 0,
+                    opacity: isHidden ? 0 : 1
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="md:hidden fixed bottom-6 left-6 right-6 h-18 z-50"
+            >
                 <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl rounded-[2rem] border border-white/10 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.5)] overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                 </div>
@@ -232,7 +265,7 @@ export const AppLayout = ({ children }) => {
                         );
                     })}
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };
