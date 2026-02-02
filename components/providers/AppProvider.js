@@ -292,8 +292,8 @@ export const AppProvider = ({ children }) => {
 
     // --- MOCK REVIEW GENERATOR ---
     const generateMockReviews = (historyItems) => {
-        // Get unique meal names from history
-        const uniqueMeals = [...new Set(historyItems.map(h => h.items[0]))];
+        // Get unique meal names from history (excluding "Skipped")
+        const uniqueMeals = [...new Set(historyItems.map(h => h.items[0]))].filter(meal => meal !== "Skipped");
         // Shuffle to ensure randomness
         const shuffled = uniqueMeals.sort(() => 0.5 - Math.random());
         // Select 7 items (3 Fav, 2 Like, 2 Dislike) is the request
@@ -373,7 +373,12 @@ export const AppProvider = ({ children }) => {
                 // Reviews Logic (dependent on History for seeding)
                 const savedReviews = localStorage.getItem("hb_meal_reviews");
                 if (savedReviews) {
-                    setReviews(JSON.parse(savedReviews));
+                    // Filter out any "Skipped" entries that may have been saved
+                    const parsedReviews = JSON.parse(savedReviews);
+                    const filteredReviews = Object.fromEntries(
+                        Object.entries(parsedReviews).filter(([meal]) => meal !== "Skipped")
+                    );
+                    setReviews(filteredReviews);
                 } else {
                     // Seed defaults if fresh load
                     const seedReviews = generateMockReviews(finalHistory);
