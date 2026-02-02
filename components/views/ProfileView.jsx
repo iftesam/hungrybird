@@ -56,7 +56,10 @@ const HealthConnectWidget = ({ isEditing, isHighlighted }) => {
                 animate={isHighlighted ? {
                     backgroundColor: ["#111827", "#7f1d1d", "#111827"],
                     scale: [1, 1.02, 1]
-                } : {}}
+                } : {
+                    backgroundColor: "#111827",
+                    scale: 1
+                }}
                 transition={{ duration: 0.2 }}
                 className={cn(
                     "bg-gray-900 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden transition-colors duration-200",

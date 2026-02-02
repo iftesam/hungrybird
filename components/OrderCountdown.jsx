@@ -120,9 +120,9 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(
-                "py-6 px-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-700 flex items-center",
+                "py-5 px-6 rounded-2xl shadow-md relative overflow-hidden group transition-all duration-300 flex items-center border",
                 currentTheme.bg,
-                isUrgent ? "shadow-red-500/20" : "shadow-black/5"
+                isUrgent ? "shadow-red-200/50 border-red-100" : "shadow-black/10 border-white/20"
             )}
         >
             {/* Theme Animation Background */}
@@ -175,9 +175,9 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
                         <p className={cn("text-xs leading-relaxed font-medium opacity-80 max-w-[320px]", currentTheme.textColor)}>
                             Orders lock 30 minutes before delivery. Swap or skip before the timer hits zero.
                         </p>
-                        <div className={cn("flex items-center gap-2 mt-2 opacity-50", currentTheme.textColor)}>
-                            <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0 animate-pulse" />
-                            <span className="text-[10px] font-bold tracking-wide uppercase">Hold active during lock-in</span>
+                        <div className={cn("flex items-center gap-2 mt-2 opacity-70", currentTheme.textColor)}>
+                            <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+                            <span className="text-[10px] font-medium tracking-normal">There will be a temporary hold on your credit card after the lock-in</span>
                         </div>
                     </div>
                 </div>
