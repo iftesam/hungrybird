@@ -22,10 +22,6 @@ export const HistoryView = () => {
     const deliveredCount = history.filter(order => order.status === "Delivered").length;
     const avgPerMeal = deliveredCount > 0 ? (totalSpent / deliveredCount) : 0;
 
-    // Avg Daily Spend (Month to Date)
-    // const daysElapsed = Math.max(now.getDate(), 1);
-    // const avgDailySpend = totalSpent / daysElapsed;
-
     // --- YEARLY AGGREGATION ---
     const yearlyData = React.useMemo(() => {
         const data = Array(12).fill(0).map((_, i) => ({
@@ -107,35 +103,48 @@ export const HistoryView = () => {
                         className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm"
                     >
                         {/* Table Header */}
-                        <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            <div className="col-span-2">Date</div>
-                            <div className="col-span-4">Restaurant & Item</div>
-                            <div className="col-span-2">Status</div>
-                            <div className="col-span-2 text-right">Amount</div>
-                            <div className="col-span-2 text-center">Receipt</div>
+                        <div className="grid grid-cols-[auto_1fr_auto_auto_auto] md:grid-cols-12 gap-2 md:gap-4 p-4 bg-gray-50 border-b border-gray-200 text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider items-center">
+                            <div className="w-12 md:w-auto md:col-span-2">Date</div>
+                            <div className="col-span-1 md:col-span-4 pl-2">Item</div>
+                            <div className="col-span-1 md:col-span-2 text-center md:text-left">St</div>
+                            <div className="col-span-1 md:col-span-2 text-right">Amt</div>
+                            <div className="col-span-1 md:col-span-2 text-center">Rcpt</div>
                         </div>
 
                         {/* Rows */}
                         <div className="divide-y divide-gray-100">
                             {history.slice(0, visibleCount).map((order) => (
-                                <div key={order.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 transition-colors group">
-                                    <div className="col-span-2">
-                                        <div className="font-bold text-gray-900">
-                                            {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                                <div key={order.id} className="grid grid-cols-[auto_1fr_auto_auto_auto] md:grid-cols-12 gap-2 md:gap-4 p-4 items-center hover:bg-gray-50 transition-colors group">
+
+                                    {/* 1. Date */}
+                                    <div className="w-12 md:w-auto md:col-span-2 shrink-0">
+                                        <div className="font-bold text-gray-900 text-xs md:text-base leading-tight">
+                                            {/* Short Date on Mobile */}
+                                            <span className="md:hidden">{new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                            <span className="hidden md:inline">{new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</span>
                                         </div>
-                                        <div className="text-xs text-gray-400">{order.time || "-"}</div>
+                                        <div className="text-[9px] md:text-xs text-gray-400 hidden md:block">{order.time || "-"}</div>
                                     </div>
-                                    <div className="col-span-4">
-                                        <div className="font-bold text-gray-900">{order.restaurant}</div>
-                                        <div className="text-xs text-gray-500">{order.items.join(", ")}</div>
+
+                                    {/* 2. Restaurant & Item */}
+                                    <div className="col-span-1 md:col-span-4 min-w-0 pl-2">
+                                        {/* Truncate on mobile */}
+                                        <div className="font-bold text-gray-900 text-xs md:text-base truncate">{order.restaurant}</div>
+                                        <div className="text-[10px] md:text-xs text-gray-500 truncate">{order.items.join(", ")}</div>
                                     </div>
-                                    <div className="col-span-2">
-                                        <StatusBadge status={order.status} />
+
+                                    {/* 3. Status (Icons on mobile) */}
+                                    <div className="col-span-1 md:col-span-2 shrink-0 flex justify-center md:justify-start">
+                                        <StatusBadge status={order.status} compactMobile />
                                     </div>
-                                    <div className="col-span-2 text-right font-mono font-bold text-gray-900">
+
+                                    {/* 4. Amount */}
+                                    <div className="col-span-1 md:col-span-2 text-right font-mono font-bold text-gray-900 text-xs md:text-base whitespace-nowrap">
                                         {order.total > 0 ? `$${order.total.toFixed(2)}` : "—"}
                                     </div>
-                                    <div className="col-span-2 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                    {/* 5. Receipt (Visible Mobile) */}
+                                    <div className="col-span-1 md:col-span-2 flex justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                         <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-500">
                                             <Download className="w-4 h-4" />
                                         </button>
@@ -204,27 +213,42 @@ export const HistoryView = () => {
     );
 };
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, compactMobile }) => {
     if (status === "Delivered") {
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                <CheckCircle className="w-3 h-3" />
-                Delivered
-            </span>
+            <>
+                {/* Mobile: Simple Tick */}
+                <div className={cn("text-emerald-500", compactMobile ? "md:hidden" : "hidden")}>
+                    <CheckCircle className="w-5 h-5" />
+                </div>
+                {/* Desktop: Full Badge */}
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
+                    <CheckCircle className="w-3 h-3" />
+                    Delivered
+                </span>
+            </>
         );
     }
     if (status === "Skipped") {
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
-                <XCircle className="w-3 h-3" />
-                Skipped
-            </span>
+            <>
+                {/* Mobile: Simple Cross */}
+                <div className={cn("text-gray-400", compactMobile ? "md:hidden" : "hidden")}>
+                    <XCircle className="w-5 h-5" />
+                </div>
+                {/* Desktop: Full Badge */}
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
+                    <XCircle className="w-3 h-3" />
+                    Skipped
+                </span>
+            </>
         );
     }
     return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700", compactMobile ? "text-[10px] px-1.5 py-0.5 md:text-xs md:px-2.5 md:py-1" : "")}>
             <Clock className="w-3 h-3" />
-            Pending
+            <span className={cn(compactMobile ? "hidden md:inline" : "inline")}>Pending</span>
+            <span className={cn("md:hidden", compactMobile ? "inline" : "hidden")}>...</span>
         </span>
     );
 };

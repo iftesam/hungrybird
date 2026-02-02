@@ -539,26 +539,109 @@ export const ScheduleView = () => {
 
     return (
         <div className="space-y-6 pb-20">
-            {/* Header / Date Navigator */}
-            <div className="flex items-center justify-between bg-[#FAFAFA] py-2">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-2xl font-bold tracking-tight">Schedule</h1>
-                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-semibold shadow-sm">
-                        <ChevronLeft className="w-4 h-4 text-gray-400" />
-                        <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
+            {/* Header / Date Navigator (State of the Art) */}
+            <div className="flex flex-col gap-4 bg-[#FAFAFA] py-2">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Schedule</h1>
+                    <div className={cn(
+                        "px-3 py-1.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors",
+                        isOverBudget
+                            ? "bg-red-50 text-red-700 border-red-100"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                    )}>
+                        <DollarSign className="w-3.5 h-3.5" />
+                        <span className="text-sm">{finalTotal.toFixed(2)}</span>
                     </div>
                 </div>
-                <div className={cn(
-                    "px-3 py-1 text-sm font-bold rounded-lg border flex items-center gap-1 transition-colors",
-                    isOverBudget
-                        ? "bg-red-50 text-red-700 border-red-100"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-100"
-                )}>
-                    <DollarSign className="w-3.5 h-3.5" />
-                    {finalTotal.toFixed(2)}
-                    <span className="text-[9px] opacity-70 ml-0.5 font-normal">w/ tax</span>
-                </div>
+
+                {/* Today's Date Display - State of the Art */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="relative overflow-hidden"
+                >
+                    <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-3xl p-6 shadow-2xl shadow-orange-500/20">
+                        {/* Animated shimmer effect */}
+                        <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                            animate={{
+                                x: ['-100%', '100%'],
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                        />
+
+                        {/* Decorative pattern overlay */}
+                        <div className="absolute inset-0 opacity-10">
+                            <div className="absolute top-2 left-4 w-20 h-20 border-2 border-white rounded-full" />
+                            <div className="absolute bottom-2 right-8 w-16 h-16 border-2 border-white rounded-full" />
+                            <div className="absolute top-1/2 right-1/4 w-12 h-12 border-2 border-white rounded-full" />
+                        </div>
+
+                        {/* Subtle glow orbs */}
+                        <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-300/20 rounded-full blur-3xl" />
+                        <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-red-300/20 rounded-full blur-3xl" />
+
+                        <div className="relative z-10 flex items-center justify-center gap-3">
+                            {/* "Today" label with pulse */}
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.05, 1],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="flex items-center gap-2"
+                            >
+                                <motion.div
+                                    className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                                    animate={{
+                                        opacity: [1, 0.5, 1],
+                                    }}
+                                    transition={{
+                                        duration: 1.5,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                />
+                                <span className="text-sm font-bold text-white/90 uppercase tracking-widest drop-shadow-lg">
+                                    Today
+                                </span>
+                            </motion.div>
+
+                            {/* Separator */}
+                            <div className="w-px h-6 bg-white/40" />
+
+                            {/* Full date with gradient text */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0, duration: 0.15 }}
+                            >
+                                <span className="text-lg md:text-xl font-bold text-white drop-shadow-lg">
+                                    {new Date().toLocaleDateString('en-US', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    }).replace(/(\d+)/, (match) => {
+                                        const num = parseInt(match);
+                                        const suffix = num === 1 || num === 21 || num === 31 ? 'st'
+                                            : num === 2 || num === 22 ? 'nd'
+                                                : num === 3 || num === 23 ? 'rd'
+                                                    : 'th';
+                                        return `${num}${suffix}`;
+                                    })}
+                                </span>
+                            </motion.div>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
 
             {/* Smart Processing Timer - All Processed State Only */}

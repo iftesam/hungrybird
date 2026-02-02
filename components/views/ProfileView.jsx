@@ -334,7 +334,7 @@ export const ProfileView = () => {
                     <HealthConnectWidget isEditing={isEditing} isHighlighted={highlightHealth} />
 
                     {/* Identity Card */}
-                    <motion.div variants={itemVariants} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
+                    <motion.div variants={itemVariants} className="bg-white p-5 md:p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
                         {/* ... Content ... */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
 
@@ -429,7 +429,7 @@ export const ProfileView = () => {
                     </motion.div>
 
                     {/* Lifestyle */}
-                    <motion.div variants={itemVariants} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                    <motion.div variants={itemVariants} className="bg-white p-5 md:p-8 rounded-3xl border border-gray-100 shadow-sm">
                         <div className="flex items-start gap-4 mb-8">
                             <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
                                 <Shield className="w-6 h-6" />

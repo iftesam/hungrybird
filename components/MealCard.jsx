@@ -70,19 +70,19 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                                 <button
                                     onClick={() => onSkip && onSkip(type)}
                                     className={cn(
-                                        "p-1.5 rounded-full transition-colors",
+                                        "w-9 h-9 flex items-center justify-center rounded-full transition-colors active:scale-95",
                                         isSkipped
                                             ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" // Restore Style
                                             : "bg-red-50 text-red-500 hover:bg-red-100" // Skip Style
                                     )}
                                     title={isSkipped ? "Restore Meal" : "Skip Meal"}
                                 >
-                                    {isSkipped ? <PlusCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                                    {isSkipped ? <PlusCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                                 </button>
                                 {!isSkipped && (
                                     <button
                                         onClick={() => onSwap && onSwap(type)}
-                                        className="p-1.5 rounded-full bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-colors"
+                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-colors active:scale-95"
                                         title="Smart Swap"
                                     >
                                         <RefreshCw className="w-4 h-4" />
@@ -106,11 +106,10 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                                 )}
                             </>
                         )}
-                        {/* If Locked, show placeholder or nothing? Nothing keeps it clean. The Overlay explains why. */}
                     </div>
                 </div>
 
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-2 px-4">
                     <div className={cn("flex-1 mr-4", isSkipped && "opacity-50")}>
                         <h3 className="font-bold text-lg text-gray-900 leading-tight mb-1">{meal.name}</h3>
                         <p className="text-sm text-gray-500 font-medium">{meal.vendor?.name || "Unknown Vendor"}</p>

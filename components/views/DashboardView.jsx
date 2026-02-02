@@ -87,22 +87,22 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
     };
 
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-6 md:space-y-8 pb-24 md:pb-20">
             {/* 1. Header & Sync Status */}
-            <div className="flex items-end justify-between">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
+                    <h1 className="text-xl md:text-2xl font-bold tracking-tight">
                         {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </h1>
-                    <p className="text-gray-500">Financials, Fuel & Logistics.</p>
+                    <p className="text-sm md:text-base text-gray-500">Financials, Fuel & Logistics.</p>
                 </div>
                 {/* Health Connect moved to ProfileSettings */}
             </div>
 
             {/* 2. Financial Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Today's Avg per Meal */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <div className="flex items-center gap-2 text-gray-400 mb-1">
                         <DollarSign className="w-4 h-4" />
                         <span className="text-xs font-bold uppercase tracking-wider">Today's Avg. Per Meal</span>
@@ -111,17 +111,17 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         const todaysMeals = Object.values(mealPlan.items || {}).filter(m => m && m.name && !m.name.includes("Skip"));
                         const totalCost = todaysMeals.reduce((sum, meal) => sum + meal.price, 0);
                         const avgPerMeal = todaysMeals.length > 0 ? totalCost / todaysMeals.length : 0;
-                        return <div className="text-3xl font-extrabold tracking-tight text-gray-900">${avgPerMeal.toFixed(2)}</div>;
+                        return <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">${avgPerMeal.toFixed(2)}</div>;
                     })()}
                 </div>
 
                 {/* Daily Cap */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <div className="flex items-center gap-2 text-gray-400 mb-1">
                         <CreditCard className="w-4 h-4" />
                         <span className="text-xs font-bold uppercase tracking-wider">Today's Buying Power</span>
                     </div>
-                    <div className="text-3xl font-extrabold tracking-tight text-gray-900">${FINANCIALS.dailyCap.toFixed(2)}</div>
+                    <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">${FINANCIALS.dailyCap.toFixed(2)}</div>
                     <div className="mt-4 text-xs font-medium text-gray-500">
                         Resets in 8h 12m
                     </div>

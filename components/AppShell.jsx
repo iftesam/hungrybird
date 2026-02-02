@@ -34,8 +34,8 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
     return (
         <div className="flex h-screen w-full bg-[#f4f4f5] font-sans text-[#171717] overflow-hidden">
 
-            {/* --- SIDEBAR --- */}
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0 z-20">
+            {/* --- SIDEBAR (DESKTOP) --- */}
+            <aside className="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col justify-between shrink-0 z-20">
                 {/* Brand Header */}
                 <div className="p-6 border-b border-gray-100">
                     <div
@@ -44,7 +44,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                         title="Reload HungryBird"
                     >
                         <img src={prefixPath('/logo.png')} alt="HungryBird Logo" className="h-10 w-auto group-hover:scale-105 transition-transform" />
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-600 hidden md:block group-hover:opacity-80 transition-opacity">
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-600 hidden lg:block group-hover:opacity-80 transition-opacity">
                             HungryBird
                         </span>
                     </div>
@@ -83,13 +83,18 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
             </aside>
 
             {/* --- MAIN CONTENT AREA --- */}
-            <main className="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] relative">
+            <main className="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] relative pb-24 md:pb-0">
                 {/* Top Header */}
-                <header className="h-16 border-b border-gray-100 bg-white/50 backdrop-blur-sm flex items-center justify-between px-8 sticky top-0 z-10">
+                <header className="h-16 border-b border-gray-100 bg-white/50 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 sticky top-0 z-[1000]">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="font-medium text-gray-900">{NAV_ITEMS.find(i => i.id === currentView)?.label}</span>
-                        <span className="text-gray-300">/</span>
-                        <span>Overview</span>
+                        {/* Mobile Logo Only */}
+                        <div className="md:hidden">
+                            <img src={prefixPath('/logo.png')} alt="Logo" className="h-8 w-auto" />
+                        </div>
+                        <span className="font-medium text-gray-900 hidden md:block">{NAV_ITEMS.find(i => i.id === currentView)?.label}</span>
+                        <span className="text-gray-300 hidden md:block">/</span>
+                        <span className="hidden md:block">Overview</span>
+                        <span className="font-bold text-gray-900 md:hidden">{NAV_ITEMS.find(i => i.id === currentView)?.label}</span>
                     </div>
 
                     {/* Header Actions */}
@@ -179,7 +184,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 </header>
 
                 {/* Content Scroll Area */}
-                <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentView}
@@ -194,6 +199,55 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                     </AnimatePresence>
                 </div>
             </main>
+
+            {/* --- MOBILE BOTTOM NAVIGATION (STATE OF THE ART) --- */}
+            <div className="md:hidden fixed bottom-6 left-6 right-6 h-18 z-50">
+                {/* Floating Island Container */}
+                <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl rounded-[2rem] border border-white/10 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.5)] overflow-hidden">
+                    {/* Subtle Internal Gradient/Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+                </div>
+
+                {/* Nav Items Container */}
+                <div className="relative h-full flex items-center justify-between px-6">
+                    {NAV_ITEMS.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => onViewChange(item.id)}
+                            className="relative flex flex-col items-center justify-center w-12 h-12 group"
+                        >
+                            {/* Active State Background Blob */}
+                            {currentView === item.id && (
+                                <motion.div
+                                    layoutId="nav-active-blob"
+                                    className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-red-500/20 rounded-full blur-md"
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                />
+                            )}
+
+                            {/* Icon */}
+                            <div className={cn(
+                                "relative z-10 transition-all duration-300",
+                                currentView === item.id
+                                    ? "text-white -translate-y-1 scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                                    : "text-gray-500 group-hover:text-gray-300"
+                            )}>
+                                <item.icon className="w-6 h-6" strokeWidth={currentView === item.id ? 2.5 : 2} />
+                            </div>
+
+                            {/* Active Indicator Dot */}
+                            {currentView === item.id && (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute bottom-1 w-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full z-10 shadow-[0_0_4px_#ef4444]"
+                                />
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
         </div>
     );
 };
