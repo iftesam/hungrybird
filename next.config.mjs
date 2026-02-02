@@ -1,5 +1,5 @@
-const isProd = process.env.NODE_ENV === 'production';
-const basePath = isProd ? '/hungrybird' : '';
+// Custom Domain: gethungrybird.com serves from root, so no basePath needed.
+const basePath = '';
 
 const nextConfig = {
   output: 'export',
