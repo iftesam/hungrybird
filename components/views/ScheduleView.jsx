@@ -628,7 +628,7 @@ export const ScheduleView = () => {
                         initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                         animate={{ opacity: 1, height: "auto", marginBottom: 24 }}
                         exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/5 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group"
+                        className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/5 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group max-w-4xl mx-auto w-full"
                     >
                         {/* Background Decoration */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[80px] -mr-4 -mt-4 transition-transform group-hover:scale-110" />

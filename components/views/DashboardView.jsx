@@ -113,17 +113,19 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
             </div>
 
             {/* ROW 2: Lock-In / Next Meal Status banner */}
-            {nextOrder ? (
-                <OrderCountdown
-                    targetDate={nextOrder.expectedTime}
-                    label={nextOrder.label}
-                    onAdjust={() => onNavigate && onNavigate("schedule")}
-                    theme={nextOrder.type}
-                />
-            ) : (
-                // Skeleton Loader to prevent layout shift/flicker
-                <div className="h-24 w-full bg-gray-100 animate-pulse rounded-2xl mb-8" />
-            )}
+            <div className="max-w-4xl mx-auto w-full">
+                {nextOrder ? (
+                    <OrderCountdown
+                        targetDate={nextOrder.expectedTime}
+                        label={nextOrder.label}
+                        onAdjust={() => onNavigate && onNavigate("schedule")}
+                        theme={nextOrder.type}
+                    />
+                ) : (
+                    // Skeleton Loader to prevent layout shift/flicker
+                    <div className="h-24 w-full bg-gray-100 animate-pulse rounded-2xl mb-8" />
+                )}
+            </div>
 
             {/* ROW 3: Split Columns (Priority Notes & Order Review) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
