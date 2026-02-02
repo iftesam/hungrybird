@@ -14,6 +14,9 @@ export const PriorityNotes = () => {
     const [duration, setDuration] = useState(1); // Default 1 Day
     const [showDurationMenu, setShowDurationMenu] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
+    const [expandedFeature, setExpandedFeature] = useState(null);
+    const MAX_SLOTS = 3;
+    const remainingSlots = MAX_SLOTS - (priorityNotes?.length || 0);
 
     const DURATIONS = [
         { label: "1 Day", value: 1 },
@@ -72,6 +75,10 @@ export const PriorityNotes = () => {
                                             <p className="text-xs leading-relaxed font-light text-gray-300">
                                                 Once approved, these notes become <span className="font-bold text-white">Hard Constraints</span>—meaning they are locked into your schedule before anything else. The system will consider your review preferences when fulfilling these requests.
                                             </p>
+                                            <div className="h-px bg-white/10 w-full" />
+                                            <p className="text-[10px] leading-relaxed font-medium text-blue-400 italic">
+                                                Demo Note: Live LLM extraction and agent-based constraint resolution are currently simulated for this prototype.
+                                            </p>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -79,7 +86,7 @@ export const PriorityNotes = () => {
                         </AnimatePresence>
                     </div>
                 </div>
-                {priorityNotes.length < 3 && !isAdding && (
+                {priorityNotes.length < MAX_SLOTS && !isAdding && (
                     <button
                         onClick={() => setIsAdding(true)}
                         className="text-[10px] font-bold bg-gray-900 text-white px-2 py-1 rounded-md hover:bg-black transition-colors"
@@ -89,37 +96,108 @@ export const PriorityNotes = () => {
                 )}
             </div>
 
-            {/* Feature Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="bg-gray-50/80 p-3 rounded-xl border border-gray-100 flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-blue-600">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">How to use</span>
+            {/* Feature Cards Grid - Collapsible */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <button
+                    onClick={() => setExpandedFeature(expandedFeature === "how" ? null : "how")}
+                    className={cn(
+                        "bg-gray-50/80 p-3 rounded-xl border transition-all duration-200 flex flex-col gap-2 text-left w-full group",
+                        expandedFeature === "how" ? "border-blue-200 bg-blue-50/30" : "border-gray-100 hover:border-gray-200"
+                    )}
+                >
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2 text-blue-600">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">How to use</span>
+                        </div>
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform duration-300", expandedFeature === "how" && "rotate-180")} />
                     </div>
-                    <p className="text-[11px] text-gray-500 leading-snug">
-                        Specify a craving ("Pizza on Friday") or a dietary need ("No dairy this week").
-                    </p>
-                </div>
+                    <AnimatePresence>
+                        {expandedFeature === "how" && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                            >
+                                <p className="text-[11px] text-gray-500 leading-snug pt-1">
+                                    Specify a craving ("Pizza on Friday") or a dietary need ("No dairy this week").
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </button>
 
-                <div className="bg-gray-50/80 p-3 rounded-xl border border-gray-100 flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-amber-600">
-                        <Zap className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">The Process</span>
+                <button
+                    onClick={() => setExpandedFeature(expandedFeature === "process" ? null : "process")}
+                    className={cn(
+                        "bg-gray-50/80 p-3 rounded-xl border transition-all duration-200 flex flex-col gap-2 text-left w-full group",
+                        expandedFeature === "process" ? "border-amber-200 bg-amber-50/30" : "border-gray-100 hover:border-gray-200"
+                    )}
+                >
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2 text-amber-600">
+                            <Zap className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">The Process</span>
+                        </div>
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform duration-300", expandedFeature === "process" && "rotate-180")} />
                     </div>
-                    <p className="text-[11px] text-gray-500 leading-snug">
-                        Our System reviews every note for actionability. Approvals take &lt; 1 minute.
-                    </p>
-                </div>
+                    <AnimatePresence>
+                        {expandedFeature === "process" && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                            >
+                                <p className="text-[11px] text-gray-500 leading-snug pt-1">
+                                    Our System reviews every note for actionability. Approvals take &lt; 1 minute.
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </button>
 
-                <div className="bg-gray-50/80 p-3 rounded-xl border border-gray-100 flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-purple-600">
-                        <Layers className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">Limit</span>
+                <button
+                    onClick={() => setExpandedFeature(expandedFeature === "limit" ? null : "limit")}
+                    className={cn(
+                        "bg-gray-50/80 p-3 rounded-xl border transition-all duration-200 flex flex-col gap-2 text-left w-full group",
+                        expandedFeature === "limit" ? "border-purple-200 bg-purple-50/30" : "border-gray-100 hover:border-gray-200"
+                    )}
+                >
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2 text-purple-600">
+                            <Layers className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-900">Limit</span>
+                        </div>
+                        <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform duration-300", expandedFeature === "limit" && "rotate-180")} />
                     </div>
-                    <p className="text-[11px] text-gray-500 leading-snug">
-                        You have <span className="font-bold text-gray-900">3 active slots</span>. Use them for what matters most!
-                    </p>
-                </div>
+                    <AnimatePresence>
+                        {expandedFeature === "limit" && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                            >
+                                <p className="text-[11px] text-gray-500 leading-snug pt-1">
+                                    {remainingSlots > 0 ? (
+                                        <>
+                                            You have <span className="font-bold text-gray-900">{remainingSlots} more active slot{remainingSlots === 1 ? '' : 's'}</span>. Use {remainingSlots === 1 ? 'it' : 'them'} for what matters most!
+                                        </>
+                                    ) : (
+                                        <>
+                                            You don't have any active slots. Kindly <span className="font-bold text-gray-900">remove one</span> or wait until one finishes.
+                                        </>
+                                    )}
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </button>
             </div>
 
             {/* Note List */}
