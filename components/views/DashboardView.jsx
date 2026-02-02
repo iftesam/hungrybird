@@ -186,14 +186,23 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         if (favoriteCount === 0 && dislikeCount === 0) return null;
 
                         return (
-                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex items-center justify-center gap-3">
+                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex flex-wrap items-center justify-center gap-3">
                                 {favoriteCount > 0 && (
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-purple-700">
                                         <Heart className="w-3.5 h-3.5 fill-current" />
                                         <span>{favoriteCount} {favoriteCount === 1 ? 'favorite' : 'favorites'} prioritized</span>
                                     </div>
                                 )}
-                                {favoriteCount > 0 && dislikeCount > 0 && (
+                                {favoriteCount > 0 && likeCount > 0 && (
+                                    <div className="w-px h-4 bg-purple-200" />
+                                )}
+                                {likeCount > 0 && (
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                                        <ThumbsUp className="w-3.5 h-3.5" />
+                                        <span>{likeCount} {likeCount === 1 ? 'like' : 'likes'} amplified</span>
+                                    </div>
+                                )}
+                                {(favoriteCount > 0 || likeCount > 0) && dislikeCount > 0 && (
                                     <div className="w-px h-4 bg-purple-200" />
                                 )}
                                 {dislikeCount > 0 && (
