@@ -8,7 +8,7 @@ const AppContext = createContext();
 // Default Initial State
 const INITIAL_PROFILE = {
     name: "Iftesam Nabi",
-    email: "iftesam.nabi@example.com",
+    email: "iftesamnabi@gmail.com",
     phone: "+1 318 000 0000",
     address: "123 Tech Lane, San Francisco, CA",
     diet: [],
