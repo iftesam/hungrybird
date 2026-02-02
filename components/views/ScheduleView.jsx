@@ -622,15 +622,33 @@ export const ScheduleView = () => {
             </div>
 
             {/* Status Banners */}
-            {isAllOrdersLocked && (
-                <div className="bg-gray-900 text-white p-5 rounded-2xl shadow-xl shadow-gray-200/50 flex items-center gap-4">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                    <div>
-                        <h3 className="font-bold text-lg">All Orders Processed</h3>
-                        <p className="text-sm text-gray-400">You are all set for today.</p>
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {isAllOrdersLocked && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: "auto", marginBottom: 24 }}
+                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/5 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group"
+                    >
+                        {/* Background Decoration */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[80px] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 relative z-10">
+                            <CheckCircle2 className="w-8 h-8" />
+                        </div>
+
+                        <div className="flex-1 text-center md:text-left relative z-10">
+                            <h3 className="font-black text-xl text-emerald-900 tracking-tight">All Orders Locked & Processed</h3>
+                            <p className="text-sm font-medium text-emerald-700/70">Your schedule is secured. We're preparing your delicious meals for delivery.</p>
+                        </div>
+
+                        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/50 rounded-full border border-emerald-100 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                            <Sparkles className="w-3 h-3" />
+                            Ready for Departure
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {validMeals.length === 0 && (
                 <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium flex items-center gap-2">

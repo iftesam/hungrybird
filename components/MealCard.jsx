@@ -42,22 +42,39 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
             )}
 
             {/* Delivered Overlay */}
-            {isDelivered && (
-                <div className="absolute top-2 right-2 z-10 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Delivered</span>
-                </div>
-            )}
+            <AnimatePresence>
+                {isDelivered && (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="absolute top-4 right-4 z-30"
+                    >
+                        <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-emerald-500/20">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Delivered Today</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Locked Overlay (Only if NOT Delivered) */}
-            {isLocked && !isDelivered && (
-                <div className="absolute top-2 right-2 z-10 bg-gray-900/80 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
-                    <Lock className="w-3 h-3" />
-                    <span>Delivery in Progress</span>
-                </div>
-            )}
+            <AnimatePresence>
+                {isLocked && !isDelivered && (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="absolute top-4 right-4 z-30"
+                    >
+                        <div className="flex items-center gap-2 px-4 py-1.5 bg-gray-900 border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl backdrop-blur-md">
+                            <Lock className="w-3.5 h-3.5 text-blue-400" />
+                            <span>Confirmed & Locked</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header Section */}
-            <div className={cn("p-4 pb-2", isLocked && "grayscale opacity-90")}>
+            <div className={cn("p-4 pb-2 relative transition-all duration-500", isLocked && "grayscale-[0.4] opacity-80")}>
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{isGuest ? "Guest Item" : type}</span>
