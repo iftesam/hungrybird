@@ -18,19 +18,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
-export const AppLayout = ({ children, currentView, onViewChange }) => {
+export const AppLayout = ({ children }) => {
+    const pathname = usePathname();
+    const router = useRouter();
     const [showNotification, setShowNotification] = useState(false);
 
 
     const NAV_ITEMS = [
-        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { id: "schedule", label: "Schedule", icon: Calendar },
-        { id: "taste-profile", label: "Taste Profile", icon: Heart },
-        { id: "history", label: "Order History", icon: Clock },
-        { id: "profile", label: "Settings", icon: User },
+        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
+        { id: "schedule", label: "Schedule", icon: Calendar, path: "/Schedule" },
+        { id: "taste-profile", label: "Taste Profile", icon: Heart, path: "/TasteProfile" },
+        { id: "history", label: "Order History", icon: Clock, path: "/OrderHistory" },
+        { id: "profile", label: "Settings", icon: User, path: "/Settings" },
     ];
+
+    const currentItem = NAV_ITEMS.find(item => item.path === pathname) || NAV_ITEMS[0];
+    const currentView = currentItem.id;
 
     return (
         <div className="flex h-screen w-full bg-[#f4f4f5] font-sans text-[#171717] overflow-hidden">
@@ -40,7 +48,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 {/* Brand Header */}
                 <div className="p-6 border-b border-gray-100">
                     <div
-                        onClick={() => window.location.href = window.location.origin}
+                        onClick={() => router.push('/')}
                         className="flex items-center gap-3 cursor-pointer group"
                         title="Reload HungryBird"
                     >
@@ -54,19 +62,19 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 {/* Navigation */}
                 <nav className="flex-1 p-4 space-y-1">
                     {NAV_ITEMS.map((item) => (
-                        <button
+                        <Link
                             key={item.id}
-                            onClick={() => onViewChange(item.id)}
+                            href={item.path}
                             className={cn(
                                 "flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                                currentView === item.id
+                                pathname === item.path
                                     ? "bg-black text-white shadow-lg shadow-black/10"
                                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                             )}
                         >
-                            <item.icon className={cn("w-5 h-5", currentView === item.id ? "text-white" : "text-gray-400 group-hover:text-gray-600")} />
+                            <item.icon className={cn("w-5 h-5", pathname === item.path ? "text-white" : "text-gray-400 group-hover:text-gray-600")} />
                             {item.label}
-                        </button>
+                        </Link>
                     ))}
                 </nav>
 
@@ -91,9 +99,9 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
             </aside>
 
             {/* --- MAIN CONTENT AREA --- */}
-            <main className="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] relative pb-24 md:pb-0">
+            <main className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative pb-24 md:pb-0">
                 {/* Top Header */}
-                <header className="h-16 border-b border-gray-100 bg-white/50 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 sticky top-0 z-[1000]">
+                <header className="h-16 border-b border-gray-200/50 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-[1000]">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                         {/* Mobile Logo Only */}
                         <div className="md:hidden">
@@ -219,13 +227,13 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 {/* Nav Items Container */}
                 <div className="relative h-full flex items-center justify-between px-6">
                     {NAV_ITEMS.map((item) => (
-                        <button
+                        <Link
                             key={item.id}
-                            onClick={() => onViewChange(item.id)}
+                            href={item.path}
                             className="relative flex flex-col items-center justify-center w-12 h-12 group"
                         >
                             {/* Active State Background Blob */}
-                            {currentView === item.id && (
+                            {pathname === item.path && (
                                 <motion.div
                                     layoutId="nav-active-blob"
                                     className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-red-500/20 rounded-full blur-md"
@@ -236,22 +244,22 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                             {/* Icon */}
                             <div className={cn(
                                 "relative z-10 transition-all duration-300",
-                                currentView === item.id
+                                pathname === item.path
                                     ? "text-white -translate-y-1 scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                                     : "text-gray-500 group-hover:text-gray-300"
                             )}>
-                                <item.icon className="w-6 h-6" strokeWidth={currentView === item.id ? 2.5 : 2} />
+                                <item.icon className="w-6 h-6" strokeWidth={pathname === item.path ? 2.5 : 2} />
                             </div>
 
                             {/* Active Indicator Dot */}
-                            {currentView === item.id && (
+                            {pathname === item.path && (
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     className="absolute bottom-1 w-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full z-10 shadow-[0_0_4px_#ef4444]"
                                 />
                             )}
-                        </button>
+                        </Link>
                     ))}
                 </div>
             </div>

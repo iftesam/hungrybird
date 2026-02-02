@@ -112,7 +112,7 @@ export const ScheduleView = () => {
 
     // Financial Constants
     const TAX_RATE = 0.08875; // ~8.8-9% Tax
-    const TARGET_DAILY = financials.monthlyBudget / 30; // e.g. $25.00
+    const TARGET_DAILY = profile.dailyAllowance || 60; // Use setting directly as source of truth
 
     // --- SMART FILTERING ENGINE ---
     const validMeals = useMemo(() => {

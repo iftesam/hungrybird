@@ -130,6 +130,7 @@ export const AppProvider = ({ children }) => {
     const [reviews, setReviews] = useState({}); // Stores user feedback { [mealName]: { liked, isFavorite } }
     const [priorityNotes, setPriorityNotes] = useState(INITIAL_PRIORITY_NOTES);
 
+    const [isHealthSynced, setIsHealthSynced] = useState(false);
 
 
     // --- LOGISTICS & HISTORY MOCK DATA ---
@@ -933,6 +934,32 @@ export const AppProvider = ({ children }) => {
         setPriorityNotes(prev => prev.filter(n => n.id !== id));
     };
 
+    const approvePriorityNote = (id) => {
+        setPriorityNotes(prev => prev.map(note => {
+            if (note.id !== id) return note;
+            return {
+                ...note,
+                status: "approved",
+                rejectionReason: null,
+                tags: {
+                    target: "Manual Override",
+                    cuisine: "Custom Request"
+                }
+            };
+        }));
+    };
+
+    const declinePriorityNote = (id, reason = "Manual Rejection") => {
+        setPriorityNotes(prev => prev.map(note => {
+            if (note.id !== id) return note;
+            return {
+                ...note,
+                status: "declined",
+                rejectionReason: reason
+            };
+        }));
+    };
+
     const value = {
         profile,
         financials: {
@@ -965,6 +992,7 @@ export const AppProvider = ({ children }) => {
         mealPlan, // Expose
         isLoaded, // Expose loading state
         priorityNotes, // Expose
+        isHealthSynced, // Expose
         actions: {
             updateProfile,
             updateFinancials,
@@ -982,7 +1010,10 @@ export const AppProvider = ({ children }) => {
             swapSpecificMeal,
             authorizeBudgetIncrease,
             addPriorityNote, // Expose
-            removePriorityNote // Expose
+            removePriorityNote, // Expose
+            approvePriorityNote,
+            declinePriorityNote,
+            setIsHealthSynced
         }
     };
 

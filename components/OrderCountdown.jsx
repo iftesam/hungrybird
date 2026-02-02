@@ -117,87 +117,91 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
 
     return (
         <motion.div
-            // initial={{ opacity: 0, scale: 0.95 }} // Removed to prevent blink
-            // animate={{ opacity: 1, scale: 1 }}     // Removed to prevent blink
-            className={cn("py-3 px-4 rounded-xl shadow-lg shadow-gray-200/50 relative overflow-hidden group transition-all duration-500 flex items-center", currentTheme.bg)}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+                "py-6 px-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-700 flex items-center",
+                currentTheme.bg,
+                isUrgent ? "shadow-red-500/20" : "shadow-black/5"
+            )}
         >
             {/* Theme Animation Background */}
             {currentTheme.animation}
 
             {/* Central Plate Animation */}
             <motion.div
-                animate={{ scale: [1, 1.05, 1], opacity: [0.1, 0.2, 0.1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0], opacity: [0.05, 0.15, 0.05] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
                 className={cn(
-                    "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full flex items-center justify-center pointer-events-none z-0",
+                    "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full flex items-center justify-center pointer-events-none z-0",
                     currentTheme.plateColor
                 )}
             >
-                <div className={cn("w-32 h-32 rounded-full border-4 border-current opacity-30 flex items-center justify-center", currentTheme.plateIconColor)}>
-                    <UtensilsCrossed className="w-16 h-16 opacity-50" />
+                <div className={cn("w-48 h-48 rounded-full border-[6px] border-current opacity-20 flex items-center justify-center", currentTheme.plateIconColor)}>
+                    <UtensilsCrossed className="w-24 h-24 opacity-30" />
                 </div>
             </motion.div>
 
             {/* Urgent State Overlay (Red Pulse) */}
             {isUrgent && (
                 <motion.div
-                    animate={{ opacity: [0, 0.15, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 bg-red-500 pointer-events-none z-0"
+                    animate={{ opacity: [0, 0.2, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 bg-red-600 pointer-events-none z-0"
                 />
             )}
 
             {/* Content Container */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10 w-full">
-                <div className="flex items-start gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10 w-full">
+                <div className="flex items-center gap-6">
                     <div className={cn(
-                        "p-2.5 rounded-lg backdrop-blur-sm shrink-0 mt-0.5",
-                        isUrgent ? "bg-red-500/20 text-red-50 animate-pulse" : currentTheme.accentColor,
+                        "p-4 rounded-2xl backdrop-blur-xl shrink-0 shadow-lg",
+                        isUrgent ? "bg-red-500/30 text-white animate-pulse" : currentTheme.accentColor,
                         currentTheme.iconColor
                     )}>
-                        <Icon className="w-5 h-5" />
+                        <Icon className="w-6 h-6" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <h4 className={cn("text-[10px] font-bold uppercase tracking-widest opacity-80", currentTheme.textColor)}>
+                        <div className="flex items-center gap-3 mb-1.5">
+                            <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] opacity-80", currentTheme.textColor)}>
                                 {currentTheme.subLabel}
                             </h4>
-                            <span className={cn("text-[10px] opacity-50", currentTheme.textColor)}>|</span>
-                            <p className={cn("text-lg font-bold tracking-tight leading-none", currentTheme.textColor)}>
+                            <span className={cn("text-[10px] opacity-30", currentTheme.textColor)}>|</span>
+                            <p className={cn("text-xl font-black tracking-tight leading-none", currentTheme.textColor)}>
                                 {label || currentTheme.label}
                             </p>
                         </div>
 
-                        <p className={cn("text-[10px] leading-tight font-medium opacity-80 max-w-[260px]", currentTheme.textColor)}>
-                            Orders lock 30 minutes before delivery. Swap or skip meal before the timer hits zero.
+                        <p className={cn("text-xs leading-relaxed font-medium opacity-80 max-w-[320px]", currentTheme.textColor)}>
+                            Orders lock 30 minutes before delivery. Swap or skip before the timer hits zero.
                         </p>
-                        <div className={cn("flex items-center gap-1.5 mt-0.5 opacity-60", currentTheme.textColor)}>
-                            <div className="w-1 h-1 rounded-full bg-current shrink-0" />
-                            <span className="text-[9px] font-medium tracking-wide leading-tight">Your card will have a temporary hold when order locks.</span>
+                        <div className={cn("flex items-center gap-2 mt-2 opacity-50", currentTheme.textColor)}>
+                            <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0 animate-pulse" />
+                            <span className="text-[10px] font-bold tracking-wide uppercase">Hold active during lock-in</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 sm:pl-4 sm:border-l sm:border-white/10 self-end sm:self-auto">
-                    <div className={cn("text-right", isUrgent ? "border-red-500/30" : "")}>
+                <div className="flex items-center gap-6 sm:pl-8 sm:border-l sm:border-white/10 self-end sm:self-auto">
+                    <div className="text-right">
                         <div className={cn(
-                            "text-3xl font-mono font-bold tracking-tighter tabular-nums leading-none",
-                            isUrgent ? "text-red-100 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" : currentTheme.textColor
+                            "text-4xl md:text-5xl font-black font-mono tracking-tighter tabular-nums leading-none",
+                            isUrgent ? "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" : currentTheme.textColor
                         )}>
                             {timeLeft}
                         </div>
-                        <p className={cn("text-[9px] font-medium uppercase tracking-wider text-right opacity-70 mt-0.5", currentTheme.textColor)}>
-                            Remaining
+                        <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-right opacity-70 mt-2", currentTheme.textColor)}>
+                            TIME REMAINING
                         </p>
                     </div>
 
                     {onAdjust && (
                         <button
                             onClick={onAdjust}
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors backdrop-blur-md group/btn"
+                            className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all backdrop-blur-md group/btn ring-1 ring-white/10 hover:ring-white/30"
                             title="Adjust Settings"
                         >
-                            <Settings2 className={cn("w-4 h-4 group-hover/btn:scale-110 transition-transform", currentTheme.textColor, "opacity-70 group-hover/btn:opacity-100")} />
+                            <Settings2 className={cn("w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-500", currentTheme.textColor, "opacity-70 group-hover/btn:opacity-100")} />
                         </button>
                     )}
                 </div>
