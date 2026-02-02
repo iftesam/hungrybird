@@ -163,7 +163,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
                 {/* Footer Info Area */}
                 <div className="mt-6 flex items-center justify-center md:justify-start gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-black/5 w-fit px-3 py-1.5 rounded-full mx-auto md:mx-0">
                     <Info className="w-3 h-3" />
-                    <span>Temporary hold applied after lock-in</span>
+                    <span>Temporary hold applied on card after lock-in</span>
                 </div>
             </div>
 
