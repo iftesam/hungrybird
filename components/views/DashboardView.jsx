@@ -188,7 +188,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
 
                         return (
                             <div
-                                onClick={() => onNavigate && onNavigate("favorites")}
+                                onClick={() => onNavigate && onNavigate("taste-profile")}
                                 className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex flex-wrap items-center justify-center gap-3 cursor-pointer hover:from-purple-100 hover:to-blue-100 transition-all duration-200"
                             >
                                 {favoriteCount > 0 && (
