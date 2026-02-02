@@ -56,31 +56,33 @@ export const PriorityNotes = () => {
                     >
                         <button
                             onClick={() => setShowHelp(!showHelp)}
-                            className="text-gray-400 hover:text-black transition-colors focus:outline-none"
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all"
                         >
-                            <HelpCircle className="w-4 h-4" />
+                            <HelpCircle className="w-4 h-4" strokeWidth={2} />
                         </button>
 
                         <AnimatePresence>
                             {showHelp && (
                                 <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[300px] z-[100]"
+                                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                    transition={{ duration: 0.15, ease: "easeOut" }}
+                                    className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[280px] z-[100]"
                                 >
-                                    <div className="relative p-5 bg-black/90 backdrop-blur-xl text-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden group">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-yellow-500/10 pointer-events-none" />
-                                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black/90 border-l border-t border-white/10 rotate-45" />
+                                    {/* Material Design Tooltip Card */}
+                                    <div className="relative bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
+                                        {/* Tooltip arrow */}
+                                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-gray-100 rotate-45" />
 
-                                        <div className="relative z-10 space-y-3 text-left">
-                                            <p className="text-xs leading-relaxed font-light text-gray-300">
+                                        {/* Content */}
+                                        <div className="relative z-10 space-y-3">
+                                            <p className="text-xs leading-relaxed text-gray-600">
                                                 Take direct control of your upcoming meals. Priority Notes allow you to override your usual habits with specific requests.
                                             </p>
-                                            <div className="h-px bg-white/10 w-full" />
-                                            <p className="text-xs leading-relaxed font-light text-gray-300">
-                                                Approved notes become <span className="font-bold text-white">Hard Constraints</span> locked into your schedule.
+                                            <div className="h-px bg-gray-200 w-full" />
+                                            <p className="text-xs leading-relaxed text-gray-600">
+                                                Approved notes become <span className="font-semibold text-gray-900">Hard Constraints</span> locked into your schedule.
                                             </p>
                                         </div>
                                     </div>
@@ -251,8 +253,8 @@ export const PriorityNotes = () => {
                                 </motion.div>
                             )}
 
-                            {/* Manual Overrides */}
-                            {(note.status === "pending" || note.status === "declined") && (
+                            {/* Manual Overrides - Only for pending notes */}
+                            {note.status === "pending" && (
                                 <div className="mt-4 flex items-center gap-2">
                                     <button
                                         onClick={() => actions.approvePriorityNote(note.id)}
@@ -261,15 +263,13 @@ export const PriorityNotes = () => {
                                         <CheckCircle2 className="w-3 h-3" />
                                         Force Approve
                                     </button>
-                                    {note.status === "pending" && (
-                                        <button
-                                            onClick={() => actions.declinePriorityNote(note.id, "Manually declined by user")}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full uppercase tracking-widest hover:bg-gray-200 transition-all"
-                                        >
-                                            <XCircle className="w-3 h-3" />
-                                            Decline
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => actions.declinePriorityNote(note.id, "Manually declined by user")}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full uppercase tracking-widest hover:bg-gray-200 transition-all"
+                                    >
+                                        <XCircle className="w-3 h-3" />
+                                        Decline
+                                    </button>
                                 </div>
                             )}
 

@@ -97,19 +97,13 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-3"
                 >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-orange-500/20">
-                        I
-                    </div>
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
-                            Good morning, Iftesam!
-                        </h1>
-                        <p className="text-sm font-medium text-gray-500">
-                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                        </p>
-                    </div>
+                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
+                        Good morning, Iftesam!
+                    </h1>
+                    <p className="text-sm font-medium text-gray-500">
+                        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    </p>
                 </motion.div>
             </div>
 
@@ -150,7 +144,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Taste Calibration</p>
                             </div>
 
-                            {/* Tooltip Integrated Next to Title */}
+                            {/* Google Material Design Tooltip */}
                             <div
                                 className="relative z-50 ml-1"
                                 onMouseEnter={() => setShowHelp(true)}
@@ -158,27 +152,29 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             >
                                 <button
                                     onClick={() => setShowHelp(!showHelp)}
-                                    className="text-gray-400 hover:text-black transition-colors focus:outline-none"
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all"
                                 >
-                                    <HelpCircle className="w-4 h-4" />
+                                    <HelpCircle className="w-4 h-4" strokeWidth={2} />
                                 </button>
 
                                 <AnimatePresence>
                                     {showHelp && (
                                         <motion.div
-                                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                            className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[300px] z-[100]"
+                                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                            transition={{ duration: 0.15, ease: "easeOut" }}
+                                            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[280px] z-[100]"
                                         >
-                                            <div className="relative p-5 bg-black/90 backdrop-blur-xl text-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden group">
-                                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none" />
-                                                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black/90 border-l border-t border-white/10 rotate-45" />
+                                            {/* Material Design Tooltip Card */}
+                                            <div className="relative bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
+                                                {/* Tooltip arrow */}
+                                                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-gray-100 rotate-45" />
 
-                                                <div className="relative z-10 space-y-3">
-                                                    <p className="text-xs leading-relaxed font-light text-gray-300 text-center">
-                                                        <span className="font-bold text-white">Dislike</span> blocks a dish forever, <span className="font-bold text-white">Like</span> suggests similar flavors, and <span className="font-bold text-white">Favorite</span> prioritizes that dish in your schedule.
+                                                {/* Content */}
+                                                <div className="relative z-10">
+                                                    <p className="text-xs leading-relaxed text-gray-600">
+                                                        <span className="font-semibold text-gray-900">Dislike</span> blocks a dish forever, <span className="font-semibold text-gray-900">Like</span> suggests similar flavors, and <span className="font-semibold text-gray-900">Favorite</span> prioritizes that dish in your schedule.
                                                     </p>
                                                 </div>
                                             </div>
@@ -189,14 +185,11 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         </div>
                     </div>
 
-                    {/* New Description Banner */}
-                    <div className="bg-zinc-50/50 p-4 rounded-[1.5rem] border border-zinc-100 flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-purple-600">
-                            <Sparkles className="w-4 h-4" />
-                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-900">Training Active</span>
-                        </div>
-                        <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                            Your feedback directly influences your taste buds—favorites are prioritized, likes suggest similar flavors, and dislikes never appear.
+                    {/* Google Material Design Info Chip */}
+                    <div className="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 rounded-full">
+                        <Sparkles className="w-4 h-4 text-purple-600" strokeWidth={2} />
+                        <p className="text-sm font-medium text-gray-700">
+                            Your feedback directly influences your taste buds.
                         </p>
                     </div>
 
