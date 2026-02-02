@@ -377,7 +377,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                 </div>
             </motion.div>
 
-            {/* ROW 5: Analytics (Daily Buying Power & Fuel) */}
+            {/* ROW 5: Analytics (Today's Buying Power & Fuel) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 {/* Today's Avg per Meal */}
                 <motion.div
@@ -389,7 +389,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
                                 <DollarSign className="w-5 h-5" />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-wider">Avg. Per Meal</span>
+                            <span className="text-sm font-bold uppercase tracking-wider">Today's Avg. Per Meal</span>
                         </div>
                         <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
                     </div>
@@ -422,11 +422,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             <div className="p-2 bg-orange-50 rounded-xl text-orange-600">
                                 <CreditCard className="w-5 h-5" />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-wider">Daily Buying Power</span>
-                        </div>
-                        <div className="flex items-center gap-1 bg-orange-100 px-2 py-0.5 rounded text-[10px] font-bold text-orange-700">
-                            <Zap className="w-3 h-3 fill-current" />
-                            ACTIVE
+                            <span className="text-sm font-bold uppercase tracking-wider">Today's Buying Power</span>
                         </div>
                     </div>
 
