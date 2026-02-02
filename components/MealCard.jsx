@@ -6,8 +6,10 @@ import { twMerge } from "tailwind-merge";
 
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
-export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, swapIndex = 0, totalSwaps = 5, isLocked = false, isDelivered = false }) => {
+export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAddGuest, deliveryInfo, swapIndex = 0, totalSwaps = 5, isLocked = false, isDelivered = false, role = "host", isSplitRestaurant = false }) => {
     if (!meal) return null;
+
+    const isGuest = role === "guest";
 
     return (
         <motion.div
@@ -21,12 +23,24 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
             className={cn(
                 "group relative rounded-2xl border transition-all overflow-hidden",
                 isLocked
-                    ? "bg-gray-50 border-gray-200" // Locked/Delivered Base Style (No Grayscale on root)
+                    ? "bg-gray-50 border-gray-200"
                     : isSkipped
                         ? "bg-gray-50 border-dashed border-gray-200"
-                        : "bg-white border-gray-100 shadow-sm hover:shadow-md"
+                        : isGuest
+                            ? "bg-white border-indigo-100 shadow-sm"
+                            : "bg-white border-gray-100 shadow-sm hover:shadow-md"
             )}
         >
+            {/* Guest Badge */}
+            {isGuest && (
+                <div className="absolute top-4 left-4 z-20">
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-black/80 backdrop-blur-md border border-white/20 rounded-full shadow-lg">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">Guest</span>
+                    </div>
+                </div>
+            )}
+
             {/* Delivered Overlay */}
             {isDelivered && (
                 <div className="absolute top-2 right-2 z-10 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
@@ -46,16 +60,16 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
             <div className={cn("p-4 pb-2", isLocked && "grayscale opacity-90")}>
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{type}</span>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{isGuest ? "Guest Item" : type}</span>
                         {!isSkipped && (
                             <>
                                 <span className={cn(
                                     "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wide",
-                                    "bg-indigo-50 text-indigo-600 border-indigo-100"
+                                    isGuest ? "bg-indigo-50 text-indigo-600 border-indigo-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
                                 )}>
                                     {meal.cuisine}
                                 </span>
-                                {meal.tags.includes("Top Tier") && (
+                                {meal.tags.includes("Top Tier") && !isGuest && (
                                     <span className="bg-yellow-100 text-yellow-700 text-[9px] font-bold px-1.5 py-0.5 rounded">Top Tier</span>
                                 )}
                             </>
@@ -67,54 +81,92 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                     <div className="flex gap-2 items-center">
                         {!isLocked && !isDelivered && (
                             <>
-                                {/* Drag Handle (Visual Context) */}
-                                <div className="drag-handle p-2 text-gray-300 hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <svg width="12" height="18" viewBox="0 0 12 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="2" cy="2" r="1.5" fill="currentColor" />
-                                        <circle cx="2" cy="9" r="1.5" fill="currentColor" />
-                                        <circle cx="2" cy="16" r="1.5" fill="currentColor" />
-                                        <circle cx="10" cy="2" r="1.5" fill="currentColor" />
-                                        <circle cx="10" cy="9" r="1.5" fill="currentColor" />
-                                        <circle cx="10" cy="16" r="1.5" fill="currentColor" />
-                                    </svg>
-                                </div>
+                                {!isSkipped && (
+                                    <>
+                                        <div className="flex items-center justify-center w-[36px] h-[36px] bg-white rounded-xl border border-gray-100 shadow-sm relative overflow-hidden group/swaps">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-transparent opacity-0 group-hover/swaps:opacity-100 transition-opacity" />
+                                            <AnimatePresence mode="popLayout" initial={false}>
+                                                <motion.span
+                                                    key={swapIndex}
+                                                    initial={{ y: 15, opacity: 0 }}
+                                                    animate={{ y: 0, opacity: 1 }}
+                                                    exit={{ y: -15, opacity: 0 }}
+                                                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                                    className="text-[10px] font-black text-gray-900 absolute z-10"
+                                                >
+                                                    {swapIndex + 1}<span className="text-gray-300 mx-0.5">/</span>{totalSwaps}
+                                                </motion.span>
+                                            </AnimatePresence>
+                                        </div>
 
-                                <button
-                                    onClick={() => onSkip && onSkip(type)}
-                                    className={cn(
-                                        "w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-95 border",
-                                        isSkipped
-                                            ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100"
-                                            : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100"
-                                    )}
-                                    title={isSkipped ? "Restore Meal" : "Skip Meal"}
-                                >
-                                    {isSkipped ? <PlusCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                                </button>
-                                {!isSkipped && (
-                                    <button
-                                        onClick={() => onSwap && onSwap(type)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 border border-gray-100 hover:bg-black hover:text-white hover:border-black transition-all active:scale-95"
-                                        title="Smart Swap"
-                                    >
-                                        <RefreshCw className="w-4 h-4" />
-                                    </button>
-                                )}
-                                {!isSkipped && (
-                                    <div className="flex items-center justify-center w-[34px] h-[34px] bg-gray-50 rounded-xl border border-gray-100 relative overflow-hidden">
-                                        <AnimatePresence mode="popLayout" initial={false}>
-                                            <motion.span
-                                                key={swapIndex}
-                                                initial={{ y: 20, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                exit={{ y: -20, opacity: 0 }}
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                                className="text-[10px] font-bold text-gray-500 absolute"
+                                        <button
+                                            onClick={() => onSwap && onSwap(type)}
+                                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 border border-gray-100 hover:bg-black hover:text-white hover:border-black transition-all active:scale-95"
+                                            title="Smart Swap"
+                                        >
+                                            <RefreshCw className="w-4 h-4" />
+                                        </button>
+
+                                        {!isGuest && !isLocked && (
+                                            <button
+                                                onClick={() => onSkip && onSkip(type)}
+                                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-all active:scale-95 group/skip"
+                                                title="Skip Meal"
                                             >
-                                                {swapIndex + 1}/{totalSwaps}
-                                            </motion.span>
-                                        </AnimatePresence>
-                                    </div>
+                                                <XCircle className="w-4 h-4" />
+                                            </button>
+                                        )}
+
+                                        {isGuest && (
+                                            <button
+                                                onClick={() => onRemove && onRemove()}
+                                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-all active:scale-95"
+                                                title="Remove Guest"
+                                            >
+                                                <XCircle className="w-4 h-4" />
+                                            </button>
+                                        )}
+
+                                        {!isGuest && (
+                                            <motion.button
+                                                whileHover={{ scale: 1.02, backgroundColor: "#000" }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => onAddGuest && onAddGuest()}
+                                                className="h-10 px-4 flex items-center justify-center gap-2.5 rounded-xl bg-gray-900 text-white shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300 border border-white/10 group/btn overflow-hidden relative"
+                                                title="Add Guest Meal"
+                                            >
+                                                {/* Button Glow Effect */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/10 to-emerald-500/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
+
+                                                <div className="relative flex items-center justify-center">
+                                                    {/* Sharp Custom Plus Icon */}
+                                                    <svg
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        className="w-4 h-4 text-emerald-400 group-hover/btn:rotate-90 transition-transform duration-500 ease-out"
+                                                        stroke="currentColor"
+                                                        strokeWidth="3"
+                                                        strokeLinecap="round"
+                                                    >
+                                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                                    </svg>
+                                                    <div className="absolute inset-0 bg-emerald-400/30 blur-md rounded-full opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-100">Add Guest</span>
+                                            </motion.button>
+                                        )}
+                                    </>
+                                )}
+
+                                {isSkipped && (
+                                    <button
+                                        onClick={() => onSkip && onSkip(type)}
+                                        className="h-9 px-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-all active:scale-95 font-bold text-[10px] uppercase tracking-wider"
+                                    >
+                                        <PlusCircle className="w-4 h-4" />
+                                        Restore
+                                    </button>
                                 )}
                             </>
                         )}
@@ -135,6 +187,16 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                         </div>
                     </div>
                 </div>
+
+                {/* Split Restaurant Warning */}
+                {isSplitRestaurant && (
+                    <div className="mx-4 mb-3 px-3 py-2 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-2 animate-pulse">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="text-[10px] font-bold text-amber-700 leading-tight">
+                            Split Restaurant Choice: This guest meal incurs a separate delivery fee.
+                        </span>
+                    </div>
+                )}
 
                 {/* Delivery Info Section (Enhanced) */}
                 {!isSkipped && deliveryInfo && (

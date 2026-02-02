@@ -25,8 +25,21 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
         financials,
         cuisines,
         restaurantPrefs,
-        mealPrefs
+        mealPrefs,
+        mealToSwap, // Assuming mealToSwap is passed in context
+        items, // Assuming items (participants) are passed in context
+        requiredRestaurant: initialRequiredRestaurant = null
     } = context;
+
+    let requiredRestaurant = initialRequiredRestaurant;
+
+    // If the meal to swap is for a guest, the required restaurant must be the host's restaurant.
+    if (mealToSwap && mealToSwap.role === "guest" && items) {
+        const host = items.find(i => i.role === "host") || items[0];
+        if (host && host.vendor && host.vendor.name) {
+            requiredRestaurant = host.vendor.name;
+        }
+    }
 
     // 1. Identify Constraints
     const currentMeal = currentSchedule[currentMealType];
@@ -78,6 +91,9 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
         // F. Hard Price Cap (Sanity check)
         // Don't show $45 dinner for a $15 lunch slot unless budget is huge
         if (meal.price > absoluteMaxPrice) return false;
+
+        // G. Required Restaurant (Guest Swap Restriction)
+        if (requiredRestaurant && meal.vendor.name !== requiredRestaurant) return false;
 
         return true;
     });

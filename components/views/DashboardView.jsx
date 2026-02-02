@@ -369,7 +369,8 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         <span className="text-xs font-bold uppercase tracking-wider">Today's Avg. Per Meal</span>
                     </div>
                     {(() => {
-                        const todaysMeals = Object.values(mealPlan.items || {}).filter(m => m && m.name && !m.name.includes("Skip"));
+                        const allItems = Object.values(mealPlan.items || {}).flat();
+                        const todaysMeals = allItems.filter(m => m && m.name && !m.name.includes("Skip"));
                         const totalCost = todaysMeals.reduce((sum, meal) => sum + meal.price, 0);
                         const avgPerMeal = todaysMeals.length > 0 ? totalCost / todaysMeals.length : 0;
                         return <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">${avgPerMeal.toFixed(2)}</div>;
@@ -382,7 +383,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         <CreditCard className="w-4 h-4" />
                         <span className="text-xs font-bold uppercase tracking-wider">Today's Buying Power</span>
                     </div>
-                    <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">${FINANCIALS.dailyCap.toFixed(2)}</div>
+                    <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">${(mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || FINANCIALS.dailyCap).toFixed(2)}</div>
                     <div className="mt-4 text-xs font-medium text-gray-500">
                         Resets in 8h 12m
                     </div>

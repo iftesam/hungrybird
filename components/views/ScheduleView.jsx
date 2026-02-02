@@ -31,10 +31,12 @@ const CUISINE_MAP = {
 
 
 const MEAL_ORDER = ["breakfast", "lunch", "dinner"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 import { OrderCountdown } from "@/components/OrderCountdown";
 import { findSmartSwap } from "@/utils/SwapLogistics";
 import { MealCard } from "@/components/MealCard";
+import { BudgetModal } from "@/components/BudgetModal";
 
 // --- SMART TIMER HOOK REMOVED (Logic moved to per-meal basis) ---
 
@@ -164,7 +166,7 @@ export const ScheduleView = () => {
         });
     }, [profile, cuisines, restaurantPrefs, reviews]);
 
-    const { updateMealPlan, toggleSkip } = actions;
+    // Simplified destructuring (moved to lower block where needed)
 
     // Alias explicitly for clarity
     const schedule = mealPlan.items || {};
@@ -176,19 +178,22 @@ export const ScheduleView = () => {
     // Calculate how many swap options exist for each slot (Current + Alternatives)
     const swapOptionsMap = useMemo(() => {
         const map = {};
-        // Context for calculations
-        const ctx = { profile, financials, cuisines, restaurantPrefs, mealPrefs };
+        const context = { profile, financials, cuisines, restaurantPrefs, mealPrefs };
+        MEAL_ORDER.forEach(type => {
+            const candidates = findSmartSwap(type, mealPlan.items, context);
+            map[type] = candidates?.length || 1;
 
-        mealPrefs.forEach(type => {
-            // Find alternatives
-            // findSmartSwap returns [Alt1, Alt2...]
-            const alts = findSmartSwap(type, schedule, ctx);
-            const altCount = alts ? alts.length : 0;
-
-            // Total options = Current Meal + Alternatives
-            // If current meal is invalid/missing, we just have alternatives. 
-            // But realistically schedule[type] should exist if validMeals > 0
-            map[type] = altCount + 1;
+            // Also calculate for each specific item in case roles differ
+            const itemsInSlot = mealPlan.items[type] || [];
+            itemsInSlot.forEach(item => {
+                if (item.role === "guest") {
+                    const host = itemsInSlot.find(i => i.role === "host") || itemsInSlot[0];
+                    const guestCandidates = findSmartSwap(type, mealPlan.items, { ...context, requiredRestaurant: host.vendor.name });
+                    map[item.id] = guestCandidates?.length || 1;
+                } else {
+                    map[item.id] = map[type];
+                }
+            });
         });
         return map;
     }, [schedule, profile, financials, cuisines, restaurantPrefs, mealPrefs]);
@@ -477,96 +482,63 @@ export const ScheduleView = () => {
         });
 
         // SAVE TO CONTEXT (PERSISTANCE)
+        // Transform the generated items into the new array-based structure
+        const arrayBasedItems = {};
+        Object.keys(newSchedule).forEach(slot => {
+            if (newSchedule[slot]) {
+                arrayBasedItems[slot] = [{
+                    ...newSchedule[slot],
+                    id: `${slot}_main`,
+                    role: "host",
+                    status: "scheduled"
+                }];
+            } else {
+                arrayBasedItems[slot] = [];
+            }
+        });
+
         updateMealPlan({
-            items: newSchedule,
-            meta: { budget: maxPreTaxTotal }
+            items: arrayBasedItems,
+            meta: {
+                ...mealPlan.meta,
+                budget: maxPreTaxTotal
+            }
         });
     }, [mealPrefs, validMeals, TARGET_DAILY, mealPlan.meta?.budget, isLoaded, priorityNotes, reviews]);
 
-    // Calculate Active Total (Excluding Skipped & Past Cutoff)
-    // Smart Logic: If the meal time has passed ("I didn't order"), it removes from the *Plan* total to show remaining liability.
-    const activeMeals = Object.entries(schedule).filter(([type]) => {
-        // 1. Check Skipped
-        if (skipped.includes(type)) return false;
+    const [budgetModal, setBudgetModal] = useState({ isOpen: false, data: null });
 
-        // 2. Check Time Cutoff
-        // Logic: Calculate Lock Time (Delivery Time - 30 minutes)
-        // If current time >= Lock Time, the meal is "Processed/Locked" and counts as "Spent".
-        // It remains in activeMeals so it shows up in the total.
-
-        return true;
-    });
-
-    const preTaxTotal = activeMeals.reduce((acc, [_, meal]) => acc + (meal?.price || 0), 0);
+    const items = mealPlan.items || {};
+    const preTaxTotal = Object.entries(items).reduce((acc, [type, slotItems]) => {
+        if (skipped.includes(type)) return acc;
+        return acc + (slotItems?.reduce((slotAcc, item) => slotAcc + (item?.price || 0), 0) || 0);
+    }, 0);
     const taxAmount = preTaxTotal * TAX_RATE;
     const finalTotal = preTaxTotal + taxAmount;
-    const isOverBudget = finalTotal > TARGET_DAILY + 0.50;
+    const isOverBudget = finalTotal > (mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY) + 0.50;
 
-    // Updated Smart Swap Logic
-    const handleSwap = (mealType) => {
-        // Prepare Context
-        const context = {
-            profile,
-            financials,
-            cuisines,
-            restaurantPrefs,
-            mealPrefs
-        };
+    const { updateMealPlan, addGuestMeal, removeGuestMeal, swapSpecificMeal, toggleSkip } = actions;
 
-        const candidates = findSmartSwap(mealType, schedule, context);
-
-        if (!candidates || candidates.length === 0) {
-            alert("No other items match your strict Filters (Cuisine/Diet/Allergy). Try enabling 'Wildcard' in settings.");
-            return;
-        }
-
-        // Cyclic Logic with Monotonic Counter
-        // 1. Get current swap count (default 0)
-        const currentCount = swapCounts[mealType] || 0;
-
-        // 2. Increment
-        const nextCount = currentCount + 1;
-
-        // 3. Select Candidate
-        // We pick from candidates using modulo
-        // candidates array has length N. 
-        // We want to cycle through them.
-        const choiceIndex = currentCount % candidates.length;
-        // Note: We use currentCount (0-based start) for index selection?
-        // If count is 0 -> index 0. 
-
-        const choice = candidates[choiceIndex];
-
-        const newItems = { ...schedule, [mealType]: choice };
-
-        updateMealPlan({
-            items: newItems,
-            meta: {
-                ...mealPlan.meta,
-                swapCounts: {
-                    ...swapCounts,
-                    [mealType]: nextCount
-                }
-            }
-        });
+    const handleSwap = (slotId, itemId) => {
+        swapSpecificMeal(slotId, itemId);
     };
 
-    const handleSkip = (mealType) => {
-        const isSkipping = !skipped.includes(mealType);
+    const handleAddGuest = (slotId) => {
+        // Budget Check
+        const items = mealPlan.items[slotId] || [];
+        if (items.length === 0) return;
 
-        if (isSkipping) {
-            actions.toggleSkip(mealType);
+        const hostItem = items[0];
+        const newTotal = finalTotal + (hostItem.price * (1 + TAX_RATE));
+        const currentLimit = mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY;
+
+        if (newTotal > currentLimit + 0.50) {
+            setBudgetModal({
+                isOpen: true,
+                data: { slotId, currentLimit, newTotal, mealCost: hostItem.price }
+            });
         } else {
-            // Un-skipping (Restoring): Check Budget!
-            const mealToRestore = schedule[mealType];
-            const potentialPreTax = preTaxTotal + (mealToRestore?.price || 0);
-            const potentialFinal = potentialPreTax * (1 + TAX_RATE);
-
-            if (potentialFinal > TARGET_DAILY + 0.50) {
-                alert(`Cannot restore meal! \nAdding this meal back($${mealToRestore.price}) pushes you over your $${TARGET_DAILY.toFixed(2)} daily limit.`);
-                return;
-            }
-            actions.toggleSkip(mealType);
+            addGuestMeal(slotId);
         }
     };
 
@@ -664,14 +636,50 @@ export const ScheduleView = () => {
                                         year: 'numeric'
                                     }).replace(/(\d+)/, (match) => {
                                         const num = parseInt(match);
-                                        const suffix = num === 1 || num === 21 || num === 31 ? 'st'
-                                            : num === 2 || num === 22 ? 'nd'
-                                                : num === 3 || num === 23 ? 'rd'
-                                                    : 'th';
+                                        const suffix = [1, 21, 31].includes(num) ? 'st' : [2, 22].includes(num) ? 'nd' : [3, 23].includes(num) ? 'rd' : 'th';
                                         return `${num}${suffix}`;
                                     })}
                                 </span>
                             </motion.div>
+
+                            {/* Smart Budget Indicator */}
+                            <div className="hidden md:flex ml-auto items-center gap-3">
+                                <div className="w-px h-6 bg-white/20" />
+                                <motion.div
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-xl border flex items-center gap-2.5 backdrop-blur-md transition-all duration-500",
+                                        mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()]
+                                            ? "bg-emerald-500/20 border-emerald-400/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                            : "bg-white/10 border-white/20"
+                                    )}
+                                    whileHover={{ scale: 1.05 }}
+                                >
+                                    <div className="flex flex-col items-start leading-none">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white/60 mb-0.5">Daily Limit</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-xl font-black text-white">
+                                                ${(mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
+                                            </span>
+                                            {mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] && (
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Visual Budget Graph (Mini) */}
+                                    <div className="flex items-end gap-1 h-6 pt-1">
+                                        {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${h * 100}%` }}
+                                                className="w-1 bg-white/30 rounded-full"
+                                                transition={{ delay: 0.5 + (i * 0.1) }}
+                                            />
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
@@ -698,20 +706,17 @@ export const ScheduleView = () => {
             )}
 
             {/* Smart Meal List (Responsive to mealPrefs) */}
-            <div className="space-y-4">
+            <div className="space-y-8">
                 <AnimatePresence>
                     {MEAL_ORDER.filter(type => mealPrefs.includes(type)).map((type, i) => {
-                        const meal = schedule[type];
+                        const slotItems = items[type] || [];
                         const isSkipped = skipped.includes(type);
 
                         // Time Filter & Lock Logic
                         const now = new Date();
-                        // Reset "now" seconds/ms to avoid flickering at the minute mark
                         now.setSeconds(0, 0);
 
-                        // Delivery Info Resolution
-                        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                        const currentDayStr = days[now.getDay()];
+                        const currentDayStr = DAYS[now.getDay()];
                         const deliveryKey = `${currentDayStr}_${type}`;
                         const scheduleEntry = deliverySchedule[deliveryKey];
 
@@ -721,54 +726,22 @@ export const ScheduleView = () => {
 
                         if (scheduleEntry) {
                             const addrObj = addresses.find(a => a.id === scheduleEntry.locationId);
-                            // Format: "Home (123 Maple St...)"
                             const locationLabel = addrObj ? `${addrObj.label} (${addrObj.address})` : "Unknown Location";
-
-                            // Time Calculations
                             const [h, m] = scheduleEntry.time.split(':').map(Number);
-
-                            // Delivery Window
                             const startTime = new Date(now);
                             startTime.setHours(h, m, 0, 0);
                             const endTime = new Date(startTime);
                             endTime.setHours(h + 1);
-
-                            // Lock Time: 30 minutes BEFORE start time
                             const lockTime = new Date(startTime.getTime() - 30 * 60000);
 
-                            // Check Status
                             isLocked = now >= lockTime;
                             isDelivered = now >= endTime;
-
                             const fmt = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                            const timeWindow = `${fmt(startTime)} - ${fmt(endTime)}`;
-
-
-                            // DEDICATED TIMER INJECTION
-                            // If it's NOT locked yet, we show the countdown.
-                            // We use the delivery-based lockTime we just assumed.
-                            // We need to pass that lockTime to the component.
-
-                            // NOTE: Since "lockTime" is scoped inside the `if (scheduleEntry)` block,
-                            // we need to lift it or ensure we have it for the timer.
-                            // Let's refactor slightly to ensure `lockTime` is available for the render check.
-
-                            if (!isLocked && !isSkipped) {
-                                // Dynamic Timer Component
-                                // We inject it here
-                                // Since we are inside the map, we can return the timer element just before the card.
-                                // But `lockTime` is only defined inside the if block. 
-                                // Let's pull `lockTime` data out.
-                            }
-
                             deliveryInfo = {
-                                time: timeWindow,
+                                time: `${fmt(startTime)} - ${fmt(endTime)}`,
                                 locationLabel: locationLabel,
-                                lockTime: lockTime  // Pass it out
+                                lockTime: lockTime
                             };
-                        } else {
-                            // Fallback logic
-                            isLocked = false;
                         }
 
                         return (
@@ -778,22 +751,68 @@ export const ScheduleView = () => {
                                     <div className="mb-4">
                                         <OrderCountdown
                                             targetDate={deliveryInfo.lockTime}
-                                            theme={type} // 'breakfast', 'lunch', 'dinner'
+                                            theme={type}
                                         />
                                     </div>
                                 )}
-                                <MealCard
-                                    type={type}
-                                    meal={meal}
-                                    isSkipped={isSkipped}
-                                    onSkip={handleSkip}
-                                    onSwap={handleSwap}
-                                    deliveryInfo={deliveryInfo}
-                                    swapIndex={(swapCounts[type] || 0) % (swapOptionsMap[type] || 1)}
-                                    totalSwaps={swapOptionsMap[type] || 1}
-                                    isLocked={isLocked}
-                                    isDelivered={isDelivered}
-                                />
+
+                                <div className="space-y-3 relative group/slot">
+                                    {/* Advanced Connector Line */}
+                                    {slotItems.length > 1 && (
+                                        <div className="absolute left-[20px] top-[80px] bottom-[60px] w-1 z-0 pointer-events-none">
+                                            {/* Glow Background */}
+                                            <div className="absolute inset-0 bg-indigo-500/10 blur-sm rounded-full" />
+                                            {/* Main Gradient Line */}
+                                            <div className="h-full w-full bg-gradient-to-b from-gray-200 via-indigo-100 to-gray-200 rounded-full relative">
+                                                {/* Pulsing Light on Connector */}
+                                                <motion.div
+                                                    animate={{ y: ["0%", "100%", "0%"] }}
+                                                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                                    className="absolute top-0 left-0 w-full h-[20%] bg-gradient-to-b from-transparent via-indigo-400 to-transparent"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {slotItems.map((meal, index) => {
+                                        const hostMeal = slotItems.find(m => m.role === "host") || slotItems[0];
+                                        const isSplitRestaurant = meal.role === "guest" && meal.restaurant !== hostMeal.restaurant;
+
+                                        return (
+                                            <motion.div
+                                                key={meal.id}
+                                                initial={{ opacity: 0, x: index > 0 ? 20 : 0, scale: index > 0 ? 0.95 : 1 }}
+                                                animate={{ opacity: 1, x: 0, scale: index > 0 ? 0.96 : 1 }}
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 260,
+                                                    damping: 20,
+                                                    delay: index * 0.1
+                                                }}
+                                                className={cn(
+                                                    index > 0 && "ml-10 origin-top shadow-indigo-100/50"
+                                                )}
+                                            >
+                                                <MealCard
+                                                    type={type}
+                                                    meal={meal}
+                                                    isSkipped={isSkipped}
+                                                    onSkip={() => toggleSkip(type)}
+                                                    onSwap={() => handleSwap(type, meal.id)}
+                                                    onRemove={() => removeGuestMeal(type, meal.id)}
+                                                    onAddGuest={() => handleAddGuest(type)}
+                                                    deliveryInfo={deliveryInfo}
+                                                    swapIndex={(mealPlan.meta?.swapCounts?.[meal.id] || 0) % (swapOptionsMap[meal.id] || 1)}
+                                                    totalSwaps={swapOptionsMap[meal.id] || 1}
+                                                    isLocked={isLocked}
+                                                    isDelivered={isDelivered}
+                                                    role={meal.role}
+                                                    isSplitRestaurant={isSplitRestaurant}
+                                                />
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
                             </React.Fragment>
                         );
                     })}
@@ -801,9 +820,22 @@ export const ScheduleView = () => {
             </div>
 
             {/* Context Summary */}
-            <div className="text-center text-xs text-gray-300 font-medium">
+            <div className="text-center text-xs text-gray-300 font-medium pb-8">
                 Generating from {validMeals.length} valid options based on your profile.
             </div>
+
+            <BudgetModal
+                isOpen={budgetModal.isOpen}
+                onClose={() => setBudgetModal({ isOpen: false, data: null })}
+                onConfirm={() => {
+                    actions.authorizeBudgetIncrease(new Date().toDateString(), budgetModal.data.newTotal);
+                    addGuestMeal(budgetModal.data.slotId);
+                    setBudgetModal({ isOpen: false, data: null });
+                }}
+                currentLimit={budgetModal.data?.currentLimit || 0}
+                newTotal={budgetModal.data?.newTotal || 0}
+                mealCost={budgetModal.data?.mealCost || 0}
+            />
         </div>
     );
 };

@@ -15,7 +15,7 @@ const INITIAL_PROFILE = {
     allergies: ["Pork"], // Pork excluded (capitalized to match DietaryPreferences component)
     notes: "",
     nutritionalStrategy: "hypertrophy", // Muscle Gain
-    drinkPrefs: ["coca-cola", "pepsi", "diet-coke", "sprite", "fanta"], // Selected drinks
+    drinkPrefs: ["coke", "pepsi", "diet-coke", "sprite", "fanta"], // Selected drinks
     ice: true, // Ice selected
     dailyAllowance: 60, // $60 daily allowance
     recurrence: { isActive: true, days: 7 }, // 7-day recurring frequency
@@ -69,7 +69,7 @@ import { findSmartSwap } from "@/utils/SwapLogistics";
 
 // --- SMART LOGISTICS SCHEDULE ---
 const INITIAL_SCHEDULE = {};
-const INITIAL_MEAL_PLAN = { items: {}, meta: { budget: 0 } }; // New Meal Plan State
+const INITIAL_MEAL_PLAN = { items: { breakfast: [], lunch: [], dinner: [] }, meta: { budget: 0, authorizedBudgets: {} } }; // New Meal Plan State
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const WEEKENDS = ["Sat", "Sun"];
@@ -346,7 +346,30 @@ export const AppProvider = ({ children }) => {
                 if (savedProfile) setProfile({ ...INITIAL_PROFILE, ...JSON.parse(savedProfile) });
                 if (savedAddresses) setAddresses(JSON.parse(savedAddresses));
                 if (savedSchedule) setDeliverySchedule(JSON.parse(savedSchedule));
-                if (savedMealPlan) setMealPlan(JSON.parse(savedMealPlan)); // Set
+                if (savedMealPlan) {
+                    const parsed = JSON.parse(savedMealPlan);
+                    // Migration Logic: Convert old object-based items to array-based items
+                    if (parsed.items && Object.keys(parsed.items).length > 0 && !Array.isArray(Object.values(parsed.items)[0])) {
+                        console.log("Migrating older mealPlan structure to array-based items...");
+                        const migratedItems = {};
+                        Object.keys(parsed.items).forEach(slot => {
+                            const item = parsed.items[slot];
+                            if (item && item.name) {
+                                migratedItems[slot] = [{
+                                    ...item,
+                                    id: `${slot}_main`,
+                                    role: "host",
+                                    status: "scheduled"
+                                }];
+                            } else {
+                                migratedItems[slot] = [];
+                            }
+                        });
+                        setMealPlan({ ...parsed, items: migratedItems });
+                    } else {
+                        setMealPlan(parsed);
+                    }
+                }
                 if (savedFinancials) setFinancials(JSON.parse(savedFinancials));
                 if (savedCuisines) setCuisines(JSON.parse(savedCuisines));
                 if (savedMealPrefs) setMealPrefs(JSON.parse(savedMealPrefs));
@@ -608,6 +631,102 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem("hb_meal_reviews", JSON.stringify(newReviews));
     };
 
+    // --- MULTI-ORDER (+1) ACTIONS ---
+    const addGuestMeal = (slotId) => {
+        const items = mealPlan.items[slotId] || [];
+        if (items.length === 0) return;
+
+        // Duplicate the host (first) item
+        const hostItem = items[0];
+        const newGuest = {
+            ...hostItem,
+            id: `${slotId}_guest_${Date.now()}`,
+            role: "guest",
+            status: "scheduled"
+        };
+
+        const newItems = {
+            ...mealPlan.items,
+            [slotId]: [...items, newGuest]
+        };
+
+        setMealPlan(prev => ({
+            ...prev,
+            items: newItems
+        }));
+    };
+
+    const removeGuestMeal = (slotId, itemId) => {
+        const items = mealPlan.items[slotId] || [];
+        const newItems = {
+            ...mealPlan.items,
+            [slotId]: items.filter(item => item.id !== itemId)
+        };
+
+        setMealPlan(prev => ({
+            ...prev,
+            items: newItems
+        }));
+    };
+
+    const swapSpecificMeal = (slotId, itemId) => {
+        const items = mealPlan.items[slotId] || [];
+        const mealToSwap = items.find(i => i.id === itemId);
+        if (!mealToSwap) return;
+
+        // If it's a guest swap, we MUST stay in the same restaurant as the host
+        let requiredRestaurant = null;
+        if (mealToSwap.role === "guest") {
+            const host = items.find(i => i.role === "host") || items[0];
+            requiredRestaurant = host.vendor.name;
+        }
+
+        const context = { profile, financials, cuisines, restaurantPrefs, mealPrefs, requiredRestaurant };
+        const candidates = findSmartSwap(slotId, mealPlan.items, context);
+
+        if (!candidates || candidates.length === 0) {
+            alert(`No other items match ${requiredRestaurant ? `from ${requiredRestaurant}` : 'your filters'}.`);
+            return;
+        }
+
+        const currentCount = (mealPlan.meta?.swapCounts?.[itemId] || 0);
+        const nextCount = currentCount + 1;
+        const choiceIndex = currentCount % candidates.length;
+        const choice = {
+            ...candidates[choiceIndex],
+            id: itemId,
+            role: mealToSwap.role,
+            status: "scheduled"
+        };
+
+        const newSlotItems = items.map(i => i.id === itemId ? choice : i);
+
+        setMealPlan(prev => ({
+            ...prev,
+            items: { ...prev.items, [slotId]: newSlotItems },
+            meta: {
+                ...prev.meta,
+                swapCounts: {
+                    ...prev.meta?.swapCounts,
+                    [itemId]: nextCount
+                }
+            }
+        }));
+    };
+
+    const authorizeBudgetIncrease = (dateKey, amount) => {
+        setMealPlan(prev => ({
+            ...prev,
+            meta: {
+                ...prev.meta,
+                authorizedBudgets: {
+                    ...prev.meta.authorizedBudgets,
+                    [dateKey]: amount
+                }
+            }
+        }));
+    };
+
     // --- PROFILE COMPLETENESS CHECK ---
     const checkCompleteness = () => {
         const missing = [];
@@ -858,6 +977,10 @@ export const AppProvider = ({ children }) => {
             updateMealPlan: setMealPlan, // Expose Action
             setRecurrenceMode,
             submitReview, // Added here
+            addGuestMeal, // New Guest Actions
+            removeGuestMeal,
+            swapSpecificMeal,
+            authorizeBudgetIncrease,
             addPriorityNote, // Expose
             removePriorityNote // Expose
         }
