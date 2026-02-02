@@ -71,13 +71,26 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
 
                 {/* User Footer */}
                 <div className="p-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
-                        <img src={prefixPath('/images/iftesam-nabi.png')} alt="User" className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
+                    <div
+                        onClick={() => setShowNotification(!showNotification)}
+                        className="relative flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
+                    >
+                        {/* Pulsing notification indicator */}
+                        <div className="absolute -top-1 -right-1 z-10">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
+                            <div className="relative flex h-3 w-3 items-center justify-center rounded-full bg-[#FA651E] border-2 border-white shadow-md"></div>
+                        </div>
+
+                        <img
+                            src={prefixPath('/images/iftesam-nabi.png')}
+                            alt="User"
+                            className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 group-hover:scale-105 transition-transform"
+                        />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">Iftesam Nabi</p>
                             <p className="text-xs text-gray-500 truncate">Pro Member</p>
                         </div>
-                        <LogOut className="w-4 h-4 text-gray-400" />
+                        <Bell className="w-4 h-4 text-gray-400 group-hover:text-orange-500 transition-colors" />
                     </div>
                 </div>
             </aside>
