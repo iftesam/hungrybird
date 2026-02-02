@@ -268,7 +268,7 @@ export const PriorityNotes = () => {
                                     className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
                                 >
                                     <Send className="w-3 h-3" />
-                                    Send to Chef
+                                    Post
                                 </button>
                             </div>
                         </div>
