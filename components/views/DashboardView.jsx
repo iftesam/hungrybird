@@ -181,9 +181,10 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                     {/* Sync Status Banner */}
                     {(() => {
                         const favoriteCount = Object.values(reviews).filter(r => r.isFavorite).length;
+                        const likeCount = Object.values(reviews).filter(r => r.liked === true && !r.isFavorite).length;
                         const dislikeCount = Object.values(reviews).filter(r => r.liked === false).length;
 
-                        if (favoriteCount === 0 && dislikeCount === 0) return null;
+                        if (favoriteCount === 0 && likeCount === 0 && dislikeCount === 0) return null;
 
                         return (
                             <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex flex-wrap items-center justify-center gap-3">
