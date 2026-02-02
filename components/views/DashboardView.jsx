@@ -187,7 +187,10 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         if (favoriteCount === 0 && likeCount === 0 && dislikeCount === 0) return null;
 
                         return (
-                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex flex-wrap items-center justify-center gap-3">
+                            <div
+                                onClick={() => onNavigate && onNavigate("favorites")}
+                                className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded-xl border border-purple-100 flex flex-wrap items-center justify-center gap-3 cursor-pointer hover:from-purple-100 hover:to-blue-100 transition-all duration-200"
+                            >
                                 {favoriteCount > 0 && (
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-purple-700">
                                         <Heart className="w-3.5 h-3.5 fill-current" />
