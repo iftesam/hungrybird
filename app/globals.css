@@ -41,3 +41,48 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Global Interactive Cursors */
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+summary,
+a,
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Input Cursors */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+textarea {
+  cursor: text;
+}
+
+/* Disabled State */
+[disabled],
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
+/* Draggable elements */
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Help Cursors */
+.cursor-help {
+  cursor: help;
+}

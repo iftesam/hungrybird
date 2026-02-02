@@ -40,7 +40,7 @@ export const DietaryPreferences = () => {
                 key={item}
                 onClick={() => toggle(item)}
                 className={cn(
-                    "relative px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
+                    "relative px-4 py-2 rounded-lg text-sm font-semibold transition-all border",
                     isActive
                         ? "bg-red-50 text-red-700 border-red-200 pl-8 shadow-sm" // Active State (Red/Excluded)
                         : "bg-white text-gray-600 border-gray-200 hover:border-gray-300" // Inactive

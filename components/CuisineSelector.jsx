@@ -84,7 +84,7 @@ export const CuisineSelector = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className={cn(
-                                "relative flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border",
+                                "relative flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 border",
                                 isActive
                                     ? "bg-black text-white border-black shadow-lg"
                                     : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"

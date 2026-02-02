@@ -269,7 +269,7 @@ export const TasteProfileView = () => {
                     <div id="likes">
                         <DropZone
                             id="likes"
-                            title="Loved it"
+                            title="Liked"
                             icon={ThumbsUp}
                             count={likesList.length}
                             items={likesList}

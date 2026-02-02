@@ -222,7 +222,7 @@ const StatusBadge = ({ status, compactMobile }) => {
                     <CheckCircle className="w-5 h-5" />
                 </div>
                 {/* Desktop: Full Badge */}
-                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
                     <CheckCircle className="w-3 h-3" />
                     Delivered
                 </span>
@@ -237,7 +237,7 @@ const StatusBadge = ({ status, compactMobile }) => {
                     <XCircle className="w-5 h-5" />
                 </div>
                 {/* Desktop: Full Badge */}
-                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
+                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500", compactMobile ? "hidden md:inline-flex" : "inline-flex")}>
                     <XCircle className="w-3 h-3" />
                     Skipped
                 </span>
@@ -245,7 +245,7 @@ const StatusBadge = ({ status, compactMobile }) => {
         );
     }
     return (
-        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700", compactMobile ? "text-[10px] px-1.5 py-0.5 md:text-xs md:px-2.5 md:py-1" : "")}>
+        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-700", compactMobile ? "text-[10px] px-1.5 py-0.5 md:text-xs md:px-2.5 md:py-1" : "")}>
             <Clock className="w-3 h-3" />
             <span className={cn(compactMobile ? "hidden md:inline" : "inline")}>Pending</span>
             <span className={cn("md:hidden", compactMobile ? "inline" : "hidden")}>...</span>

@@ -64,16 +64,28 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                     </div>
 
                     {/* Action Buttons (Conditioned on Lock/Delivered) */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                         {!isLocked && !isDelivered && (
                             <>
+                                {/* Drag Handle (Visual Context) */}
+                                <div className="drag-handle p-2 text-gray-300 hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg width="12" height="18" viewBox="0 0 12 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="2" cy="2" r="1.5" fill="currentColor" />
+                                        <circle cx="2" cy="9" r="1.5" fill="currentColor" />
+                                        <circle cx="2" cy="16" r="1.5" fill="currentColor" />
+                                        <circle cx="10" cy="2" r="1.5" fill="currentColor" />
+                                        <circle cx="10" cy="9" r="1.5" fill="currentColor" />
+                                        <circle cx="10" cy="16" r="1.5" fill="currentColor" />
+                                    </svg>
+                                </div>
+
                                 <button
                                     onClick={() => onSkip && onSkip(type)}
                                     className={cn(
-                                        "w-9 h-9 flex items-center justify-center rounded-full transition-colors active:scale-95",
+                                        "w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-95 border",
                                         isSkipped
-                                            ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" // Restore Style
-                                            : "bg-red-50 text-red-500 hover:bg-red-100" // Skip Style
+                                            ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100"
+                                            : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100"
                                     )}
                                     title={isSkipped ? "Restore Meal" : "Skip Meal"}
                                 >
@@ -82,14 +94,14 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, deliveryInfo, 
                                 {!isSkipped && (
                                     <button
                                         onClick={() => onSwap && onSwap(type)}
-                                        className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-black hover:text-white transition-colors active:scale-95"
+                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 border border-gray-100 hover:bg-black hover:text-white hover:border-black transition-all active:scale-95"
                                         title="Smart Swap"
                                     >
                                         <RefreshCw className="w-4 h-4" />
                                     </button>
                                 )}
                                 {!isSkipped && (
-                                    <div className="flex items-center justify-center w-[34px] h-[34px] bg-gray-50 rounded-full border border-gray-100 relative overflow-hidden">
+                                    <div className="flex items-center justify-center w-[34px] h-[34px] bg-gray-50 rounded-xl border border-gray-100 relative overflow-hidden">
                                         <AnimatePresence mode="popLayout" initial={false}>
                                             <motion.span
                                                 key={swapIndex}

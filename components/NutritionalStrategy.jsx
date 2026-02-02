@@ -70,7 +70,7 @@ export const NutritionalStrategy = ({ onAccessDenied }) => {
                             key={s.id}
                             onClick={() => isLocked ? onAccessDenied?.() : onUpdate(s.id)}
                             className={cn(
-                                "relative flex items-start gap-4 p-4 rounded-2xl text-left transition-all duration-200 border-2",
+                                "relative flex items-start gap-4 p-4 rounded-xl text-left transition-all duration-200 border-2",
                                 isLocked
                                     ? "bg-gray-50 border-gray-100 opacity-60 cursor-pointer grayscale hover:bg-red-50/50 hover:border-red-100" // Interactive locked state
                                     : isActive

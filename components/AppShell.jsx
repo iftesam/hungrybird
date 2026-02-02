@@ -137,7 +137,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                                         transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                         className="absolute right-0 top-full mt-2 w-[280px] z-[100]"
                                     >
-                                        <div className="relative p-5 bg-black/90 backdrop-blur-xl text-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden group text-left">
+                                        <div className="relative p-5 bg-black/90 backdrop-blur-xl text-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden group text-left">
                                             {/* Glow Effect */}
                                             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none" />
 

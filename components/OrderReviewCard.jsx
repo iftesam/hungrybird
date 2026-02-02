@@ -180,7 +180,7 @@ export const OrderReviewCard = ({ order, onRemove }) => {
                     {/* Dislike */}
                     <button
                         onClick={handleDislike}
-                        className="p-2 rounded-full bg-white text-gray-400 border border-gray-200 hover:border-gray-300 hover:text-gray-600 transition-all"
+                        className="p-2 rounded-xl bg-white text-gray-400 border border-gray-200 hover:border-gray-300 hover:text-gray-600 transition-all active:scale-95"
                     >
                         <ThumbsDown className="w-4 h-4" />
                     </button>
@@ -188,7 +188,7 @@ export const OrderReviewCard = ({ order, onRemove }) => {
                     {/* Like */}
                     <button
                         onClick={handleLike}
-                        className="p-2 rounded-full transition-all border bg-white text-gray-400 border-gray-200 hover:border-emerald-200 hover:text-emerald-500"
+                        className="p-2 rounded-xl transition-all border bg-white text-gray-400 border-gray-200 hover:border-emerald-200 hover:text-emerald-500 active:scale-95"
                     >
                         <ThumbsUp className="w-4 h-4" />
                     </button>

@@ -94,7 +94,6 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                     <h1 className="text-xl md:text-2xl font-bold tracking-tight">
                         {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </h1>
-                    <p className="text-sm md:text-base text-gray-500">Financials, Fuel & Logistics.</p>
                 </div>
                 {/* Health Connect moved to ProfileSettings */}
             </div>
