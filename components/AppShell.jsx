@@ -73,13 +73,8 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                 <div className="p-4 border-t border-gray-100">
                     <div
                         onClick={() => setShowNotification(!showNotification)}
-                        className="relative flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
+                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
                     >
-                        {/* Pulsing notification indicator */}
-                        <div className="absolute -top-1 -right-1 z-10">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
-                            <div className="relative flex h-3 w-3 items-center justify-center rounded-full bg-[#FA651E] border-2 border-white shadow-md"></div>
-                        </div>
 
                         <img
                             src={prefixPath('/images/iftesam-nabi.png')}
