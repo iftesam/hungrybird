@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Timer, Settings2, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed } from "lucide-react";
+import { Timer, Settings2, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info } from "lucide-react";
 import { clsx } from "clsx";
 import { motion } from "framer-motion";
 import { twMerge } from "tailwind-merge";
@@ -12,78 +12,37 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
     const [timeLeft, setTimeLeft] = useState("");
     const [isUrgent, setIsUrgent] = useState(false);
 
-    // THEME CONFIGURATION
+    // GOOGLE MATERIAL DESIGN 3 THEME CONFIGURATION
     const THEMES = {
         breakfast: {
-            bg: "bg-gradient-to-br from-orange-400 to-amber-500",
             icon: Sunrise,
-            iconColor: "text-amber-50",
-            textColor: "text-white",
-            accentColor: "bg-white/20",
-            plateColor: "bg-amber-100/20",
-            plateIconColor: "text-amber-100",
+            iconBg: "bg-amber-50",
+            iconColor: "text-amber-600",
+            accentColor: "bg-amber-600",
+            accentLight: "bg-amber-50",
+            leftBorder: "border-l-amber-500",
             label: "Breakfast",
             subLabel: "Lock-in",
-            animation: (
-                <motion.div
-                    animate={{ y: [0, -20, 0], opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-300 rounded-full blur-3xl -mb-10 -mr-10 opacity-60 pointer-events-none"
-                />
-            )
         },
         lunch: {
-            bg: "bg-gradient-to-br from-sky-400 to-blue-500",
             icon: Sun,
-            iconColor: "text-blue-50",
-            textColor: "text-white",
-            accentColor: "bg-white/20",
-            plateColor: "bg-white/20",
-            plateIconColor: "text-blue-50",
+            iconBg: "bg-blue-50",
+            iconColor: "text-blue-600",
+            accentColor: "bg-blue-600",
+            accentLight: "bg-blue-50",
+            leftBorder: "border-l-blue-500",
             label: "Lunch",
             subLabel: "Lock-in",
-            animation: (
-                <>
-                    <motion.div
-                        animate={{ x: [0, 40, 0], opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute top-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-40 pointer-events-none"
-                    />
-                    <motion.div
-                        animate={{ x: [0, -30, 0], scale: [1, 1.1, 1] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute bottom-0 left-20 w-56 h-56 bg-sky-300 rounded-full blur-3xl opacity-30 pointer-events-none"
-                    />
-                </>
-            )
         },
         dinner: {
-            bg: "bg-gray-950", // Deepest Dark
             icon: Sparkles,
-            iconColor: "text-indigo-200",
-            textColor: "text-white",
-            accentColor: "bg-indigo-900/50",
-            plateColor: "bg-white/10",
-            plateIconColor: "text-indigo-200",
+            iconBg: "bg-indigo-50",
+            iconColor: "text-indigo-600",
+            accentColor: "bg-indigo-600",
+            accentLight: "bg-indigo-50",
+            leftBorder: "border-l-indigo-500",
             label: "Dinner",
             subLabel: "Lock-in",
-            animation: (
-                <>
-                    <motion.div
-                        animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.2, 1] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute top-4 right-10 w-2 h-2 bg-white rounded-full blur-[1px] shadow-[0_0_10px_rgba(255,255,255,0.8)] pointer-events-none"
-                    />
-                    <motion.div
-                        animate={{ opacity: [0.1, 0.4, 0.1], scale: [1, 1.5, 1] }}
-                        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute bottom-10 left-10 w-3 h-3 bg-indigo-400 rounded-full blur-[2px] pointer-events-none"
-                    />
-                    <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"
-                    />
-                </>
-            )
         }
     };
 
@@ -98,7 +57,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
 
             if (diff <= 0) {
                 setTimeLeft("00h 00m 00s");
-                setIsUrgent(false); // or true depending on desired behavior for expired
+                setIsUrgent(false);
                 return;
             }
 
@@ -117,95 +76,107 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className={cn(
-                "py-5 px-6 rounded-2xl shadow-md relative overflow-hidden group transition-all duration-300 flex items-center border",
-                currentTheme.bg,
-                isUrgent ? "shadow-red-200/50 border-red-100" : "shadow-black/10 border-white/20"
+                "relative bg-white rounded-3xl p-6 transition-all duration-200 border-l-4",
+                currentTheme.leftBorder,
+                isUrgent
+                    ? "shadow-[0_2px_8px_rgba(220,38,38,0.12),0_8px_16px_rgba(220,38,38,0.08)] ring-1 ring-red-100 !border-l-red-500"
+                    : "shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.08)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08)]"
             )}
         >
-            {/* Theme Animation Background */}
-            {currentTheme.animation}
+            {/* Google-style subtle background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 via-transparent to-transparent rounded-3xl pointer-events-none" />
 
-            {/* Central Plate Animation */}
-            <motion.div
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0], opacity: [0.05, 0.15, 0.05] }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className={cn(
-                    "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full flex items-center justify-center pointer-events-none z-0",
-                    currentTheme.plateColor
-                )}
-            >
-                <div className={cn("w-48 h-48 rounded-full border-[6px] border-current opacity-20 flex items-center justify-center", currentTheme.plateIconColor)}>
-                    <UtensilsCrossed className="w-24 h-24 opacity-30" />
-                </div>
-            </motion.div>
-
-            {/* Urgent State Overlay (Red Pulse) */}
+            {/* Urgent state overlay */}
             {isUrgent && (
                 <motion.div
-                    animate={{ opacity: [0, 0.2, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 bg-red-600 pointer-events-none z-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 bg-red-50/30 rounded-3xl pointer-events-none"
                 />
             )}
 
-            {/* Content Container */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10 w-full">
-                <div className="flex items-center gap-6">
+            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                {/* Left Section: Content */}
+                <div className="flex items-start gap-4 flex-1">
+                    {/* Icon Container - Google Material Style */}
                     <div className={cn(
-                        "p-4 rounded-2xl backdrop-blur-xl shrink-0 shadow-lg",
-                        isUrgent ? "bg-red-500/30 text-white animate-pulse" : currentTheme.accentColor,
-                        currentTheme.iconColor
+                        "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors",
+                        isUrgent
+                            ? "bg-red-50 text-red-600"
+                            : cn(currentTheme.iconBg, currentTheme.iconColor)
                     )}>
-                        <Icon className="w-6 h-6" />
+                        <Icon className="w-6 h-6" strokeWidth={2} />
                     </div>
-                    <div>
-                        <div className="flex items-center gap-3 mb-1.5">
-                            <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] opacity-80", currentTheme.textColor)}>
-                                {currentTheme.subLabel}
-                            </h4>
-                            <span className={cn("text-[10px] opacity-30", currentTheme.textColor)}>|</span>
-                            <p className={cn("text-xl font-black tracking-tight leading-none", currentTheme.textColor)}>
+
+                    {/* Text Content */}
+                    <div className="flex-1 min-w-0">
+                        {/* Header with meal type */}
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-sm font-medium text-gray-900 tracking-normal">
                                 {label || currentTheme.label}
-                            </p>
+                            </h3>
+                            <span className="text-xs font-medium text-gray-400">•</span>
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                {currentTheme.subLabel}
+                            </span>
                         </div>
 
-                        <p className={cn("text-xs leading-relaxed font-medium opacity-80 max-w-[320px]", currentTheme.textColor)}>
+                        {/* Description text */}
+                        <p className="text-xs text-gray-600 leading-relaxed mb-2.5 max-w-md">
                             Orders lock 30 minutes before delivery. Swap or skip before the timer hits zero.
                         </p>
-                        <div className={cn("flex items-center gap-2 mt-2 opacity-70", currentTheme.textColor)}>
-                            <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
-                            <span className="text-[10px] font-medium tracking-normal">There will be a temporary hold on your credit card after the lock-in</span>
+
+                        {/* Info badge - Google style */}
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-full">
+                            <Info className="w-3 h-3 text-gray-500" strokeWidth={2} />
+                            <span className="text-[11px] font-medium text-gray-600">
+                                There will be a temporary hold on your credit card after the lock-in
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6 sm:pl-8 sm:border-l sm:border-white/10 self-end sm:self-auto">
-                    <div className="text-right">
+                {/* Right Section: Timer & Actions */}
+                <div className="flex items-center gap-4 sm:border-l sm:border-gray-200 sm:pl-6">
+                    {/* Timer Display - Google style monospace */}
+                    <div className="text-center">
                         <div className={cn(
-                            "text-4xl md:text-5xl font-black font-mono tracking-tighter tabular-nums leading-none",
-                            isUrgent ? "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" : currentTheme.textColor
+                            "text-3xl sm:text-4xl font-semibold font-mono tabular-nums tracking-tight transition-colors",
+                            isUrgent ? "text-red-600" : "text-gray-900"
                         )}>
                             {timeLeft}
                         </div>
-                        <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-right opacity-70 mt-2", currentTheme.textColor)}>
-                            TIME REMAINING
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500 mt-1">
+                            Time Remaining
                         </p>
                     </div>
 
+                    {/* Settings button - Google icon button style */}
                     {onAdjust && (
                         <button
                             onClick={onAdjust}
-                            className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all backdrop-blur-md group/btn ring-1 ring-white/10 hover:ring-white/30"
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
                             title="Adjust Settings"
                         >
-                            <Settings2 className={cn("w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-500", currentTheme.textColor, "opacity-70 group-hover/btn:opacity-100")} />
+                            <Settings2 className="w-5 h-5" strokeWidth={2} />
                         </button>
                     )}
                 </div>
             </div>
+
+            {/* Urgent state: subtle bottom accent */}
+            {isUrgent && (
+                <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-orange-500 rounded-b-3xl"
+                />
+            )}
         </motion.div>
     );
 };

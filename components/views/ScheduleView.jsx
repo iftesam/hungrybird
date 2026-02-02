@@ -51,35 +51,10 @@ export const ScheduleView = () => {
     // IMPORTANT: This useState must be called BEFORE any conditional returns to follow Rules of Hooks
     const [isAllOrdersLocked, setIsAllOrdersLocked] = useState(false);
 
-    if (!isLoaded) return null; // Wait for hydration
-
-    // --- SETUP REQUIRED STATE ---
-    const configContent = !isConfigured ? (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 animate-in fade-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                <AlertCircle className="w-10 h-10 text-gray-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Setup Required</h2>
-            <p className="text-gray-500 max-w-sm mb-8">
-                We need a bit more info to generate your schedule. Please complete your profile to continue.
-            </p>
-
-            <div className="w-full max-w-xs space-y-3 mb-8">
-                {missingConfig.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100">
-                        <XCircle className="w-4 h-4 shrink-0" />
-                        Missing {item}
-                    </div>
-                ))}
-            </div>
-
-            <p className="text-xs text-gray-400">
-                Visit the <span className="font-bold text-gray-600">Profile Tab</span> to update your settings.
-            </p>
-        </div>
-    ) : null;
-
+    // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
     useEffect(() => {
+        if (!isLoaded) return; // Skip effect if not loaded yet
+
         const checkAllLocked = () => {
             const now = new Date();
             const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -107,7 +82,35 @@ export const ScheduleView = () => {
         const i = setInterval(checkAllLocked, 1000);
         checkAllLocked();
         return () => clearInterval(i);
-    }, [mealPrefs, skipped, deliverySchedule]);
+    }, [isLoaded, mealPrefs, skipped, deliverySchedule]);
+
+    if (!isLoaded) return null; // Wait for hydration
+
+    // --- SETUP REQUIRED STATE ---
+    const configContent = !isConfigured ? (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <AlertCircle className="w-10 h-10 text-gray-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Setup Required</h2>
+            <p className="text-gray-500 max-w-sm mb-8">
+                We need a bit more info to generate your schedule. Please complete your profile to continue.
+            </p>
+
+            <div className="w-full max-w-xs space-y-3 mb-8">
+                {missingConfig.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100">
+                        <XCircle className="w-4 h-4 shrink-0" />
+                        Missing {item}
+                    </div>
+                ))}
+            </div>
+
+            <p className="text-xs text-gray-400">
+                Visit the <span className="font-bold text-gray-600">Profile Tab</span> to update your settings.
+            </p>
+        </div>
+    ) : null;
 
     // Financial Constants
     const TAX_RATE = 0.08875; // ~8.8-9% Tax
