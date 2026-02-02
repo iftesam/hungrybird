@@ -11,7 +11,8 @@ import {
     Menu,
     Clock,
     Heart,
-    Linkedin
+    Linkedin,
+    ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
@@ -84,6 +85,7 @@ export const AppLayout = ({ children, currentView, onViewChange }) => {
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">Iftesam Nabi</p>
                         </div>
+                        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 transition-colors" />
                     </div>
                 </div>
             </aside>
