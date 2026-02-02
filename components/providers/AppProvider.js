@@ -615,6 +615,55 @@ export const AppProvider = ({ children }) => {
                 const textLower = text.toLowerCase();
                 let rejectionReason = null;
 
+                // 0. VALIDATE REQUEST IS MEAL-RELATED (NEW - Most Important Check)
+                // Reject common non-food requests
+                const invalidKeywords = [
+                    { word: 'flight', reason: 'Invalid Request: This is a meal planning service. We cannot book flights.' },
+                    { word: 'hotel', reason: 'Invalid Request: This is a meal planning service. We cannot book hotels or accommodations.' },
+                    { word: 'booking', reason: 'Invalid Request: This is a meal planning service. Please request specific meals or dishes.' },
+                    { word: 'taxi', reason: 'Invalid Request: This is a meal planning service. We cannot arrange transportation.' },
+                    { word: 'uber', reason: 'Invalid Request: This is a meal planning service. We cannot arrange transportation.' },
+                    { word: 'car rental', reason: 'Invalid Request: This is a meal planning service. We cannot arrange transportation.' },
+                    { word: 'ticket', reason: 'Invalid Request: This is a meal planning service. We cannot purchase tickets.' },
+                    { word: 'appointment', reason: 'Invalid Request: This is a meal planning service. Please request specific meals.' },
+                    { word: 'meeting', reason: 'Invalid Request: This is a meal planning service. Please request specific meals.' },
+                    { word: 'reservation', reason: 'Invalid Request: This is a meal planning service. We handle meal delivery, not restaurant reservations.' }
+                ];
+
+                // Check for invalid keywords
+                for (const { word, reason } of invalidKeywords) {
+                    if (textLower.includes(word)) {
+                        rejectionReason = reason;
+                        break;
+                    }
+                }
+
+                // If no invalid keywords, verify it's food-related
+                if (!rejectionReason) {
+                    const foodRelatedKeywords = [
+                        'meal', 'food', 'eat', 'hungry', 'breakfast', 'lunch', 'dinner',
+                        'pizza', 'burger', 'salad', 'tacos', 'sushi', 'pasta', 'steak',
+                        'chicken', 'rice', 'sandwich', 'soup', 'curry', 'nihari', 'pakwan',
+                        'dish', 'cuisine', 'restaurant', 'delivery', 'order', 'spicy', 'vegetarian',
+                        'vegan', 'protein', 'carbs', 'calories', 'nutritious', 'healthy'
+                    ];
+
+                    const hasFoodKeyword = foodRelatedKeywords.some(keyword => textLower.includes(keyword));
+
+                    if (!hasFoodKeyword && text.length > 5) {
+                        rejectionReason = 'Invalid Request: Please specify a meal-related request. Example: "I want pizza for dinner" or "Give me tacos for lunch tomorrow."';
+                    }
+                }
+
+                // If already rejected, skip other validations
+                if (rejectionReason) {
+                    return {
+                        ...note,
+                        status: "declined",
+                        rejectionReason: rejectionReason
+                    };
+                }
+
                 // 1. EXTRACT MEAL TIME
                 const mealMatches = textLower.match(/(breakfast|lunch|dinner)/i);
                 const requestedMeal = mealMatches ? mealMatches[0].toLowerCase() : null;
