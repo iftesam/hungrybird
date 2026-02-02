@@ -114,10 +114,11 @@ export const AppLayout = ({ children }) => {
             </aside>
 
             {/* --- MAIN CONTENT AREA --- */}
-            <main className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative pb-24 md:pb-0">
+            <main className="flex-1 relative bg-zinc-50/50">
                 <header className={cn(
-                    "h-16 border-b border-gray-200/50 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 transition-transform duration-300 z-[1000]",
-                    isHidden && "md:translate-y-0 -translate-y-full"
+                    "h-16 border-b border-gray-200/50 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-[1000] transition-transform duration-300",
+                    "fixed top-0 left-0 right-0 md:left-64",
+                    isHidden && "-translate-y-full"
                 )}>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="md:hidden">
@@ -194,7 +195,7 @@ export const AppLayout = ({ children }) => {
 
                 <div
                     ref={scrollRef}
-                    className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide"
+                    className="absolute inset-0 overflow-y-auto scrollbar-hide pt-16"
                 >
                     <AnimatePresence mode="wait" initial={false}>
                         {/* FIX 3: THE GOLDEN FIX. Use pathname as the key. */}
@@ -208,7 +209,7 @@ export const AppLayout = ({ children }) => {
                                 damping: 30,
                                 duration: 0.2
                             }}
-                            className="w-full max-w-6xl mx-auto"
+                            className="w-full max-w-6xl mx-auto p-4 md:p-8 pb-32"
                         >
                             {children}
                         </motion.div>
