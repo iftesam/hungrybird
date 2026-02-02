@@ -350,10 +350,6 @@ export const ProfileView = () => {
                             </div>
 
                             <h2 className="text-2xl font-bold text-gray-900">{userProfile.name}</h2>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                                <span className="text-sm font-medium text-gray-500">Active Subscriber</span>
-                            </div>
                         </div>
                         {/* ... Inputs ... */}
                         <div className="mt-8 space-y-5">
