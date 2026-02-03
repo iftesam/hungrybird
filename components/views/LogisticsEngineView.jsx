@@ -586,13 +586,6 @@ export const LogisticsEngineView = () => {
                                 <span className="text-gray-500">We show the $7.99 fee for custom orders to make the $0.99 fee for batched orders look like a steal.</span>
                             </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <div className="p-1 bg-purple-100 rounded text-purple-600 mt-1"><Zap className="w-4 h-4" /></div>
-                            <div>
-                                <strong className="block text-gray-900">The Wildcard Hack</strong>
-                                <span className="text-gray-500">Indecisive? The "Wildcard" button fills empty seats on existing trucks, maximizing our margin to 100%.</span>
-                            </div>
-                        </li>
                     </ul>
                 </div>
             </div>
