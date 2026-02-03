@@ -108,10 +108,10 @@ export const LogisticsEngineView = () => {
     };
 
     return (
-        <div className="pb-24 max-w-6xl mx-auto space-y-16">
+        <div className="pb-12 md:pb-24 max-w-6xl mx-auto space-y-8 md:space-y-16">
 
             {/* --- HEADER --- */}
-            <div className="space-y-6 pt-10">
+            <div className="space-y-6 pt-6 md:pt-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -286,12 +286,12 @@ export const LogisticsEngineView = () => {
                 </div>
 
                 {/* RIGHT: THE DIGITAL TWIN (VISUALIZER) */}
-                <div className="lg:col-span-8 bg-gray-900 rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-2xl">
+                <div className="lg:col-span-8 bg-gray-900 rounded-3xl p-4 md:p-8 relative overflow-hidden flex flex-col justify-between shadow-2xl">
                     {/* Background Grid */}
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 
                     {/* 1. VISUAL MAP LOGIC */}
-                    <div className="relative flex-1 flex items-center justify-center min-h-[400px]">
+                    <div className="relative flex-1 flex items-center justify-center min-h-[300px] md:min-h-[400px]">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeMode}
@@ -483,7 +483,7 @@ export const LogisticsEngineView = () => {
                     </AnimatePresence>
 
                     {/* 3. UNIT ECONOMICS ROW */}
-                    <div className="grid grid-cols-5 gap-2 text-center divide-x divide-white/10 border-t border-white/10 pt-6">
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-2 gap-y-4 md:gap-y-0 text-center md:divide-x divide-white/10 border-t border-white/10 pt-6">
                         <div className="col-span-1">
                             <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Customer Pays</div>
                             <div className="text-white font-mono text-sm">
@@ -503,7 +503,7 @@ export const LogisticsEngineView = () => {
                                 -<NumberTicker value={mode.math.foodCost} prefix="$" color="text-gray-400" />
                             </div>
                         </div>
-                        <div className="col-span-2 bg-emerald-500/10 rounded-lg py-1 border border-emerald-500/20">
+                        <div className="col-span-3 md:col-span-2 bg-emerald-500/10 rounded-lg py-1 border border-emerald-500/20">
                             <div className={`text-[10px] uppercase tracking-wider mb-1 font-bold ${themeColor.text}`}>Hourly Profit</div>
                             <div className={`font-mono text-xl font-black ${mode.math.batchProfit >= 0 ? themeColor.text : 'text-rose-500'}`}>
                                 <NumberTicker value={mode.math.batchProfit} prefix="$" color="currentColor" />
