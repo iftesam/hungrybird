@@ -101,14 +101,14 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     className={cn(
-                        "absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group/dismiss",
+                        "absolute top-3 right-3 z-20 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group/dismiss",
                         isUrgent
                             ? "bg-white/80 hover:bg-white border-red-200 hover:border-red-300 text-red-600 hover:text-red-700 shadow-red-500/20"
                             : "bg-white/60 hover:bg-white/90 border-gray-200/50 hover:border-gray-300 text-gray-600 hover:text-gray-900 shadow-black/10"
                     )}
                     aria-label="Dismiss lock-in"
                 >
-                    <X className="w-4 h-4 transition-transform group-hover/dismiss:rotate-90" strokeWidth={2.5} />
+                    <X className="w-3 h-3 transition-transform group-hover/dismiss:rotate-90" strokeWidth={2.5} />
                 </motion.button>
             )}
 
