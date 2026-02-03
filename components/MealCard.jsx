@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, XCircle, PlusCircle, RefreshCw, Lock, Clock, MapPin } from "lucide-react";
+import { CheckCircle2, XCircle, PlusCircle, RefreshCw, Lock, Clock, MapPin, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -218,33 +218,41 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
                 {/* Delivery Info Section (Enhanced) */}
                 {!isSkipped && deliveryInfo && (
                     <div className="mx-4 mt-2 px-3 py-3 bg-gray-50/80 rounded-xl border border-gray-100 flex flex-col gap-2">
-                        {/* Row 1: Time & Location */}
-                        <div className="flex items-start gap-4">
-                            <div className="flex flex-col gap-0.5 flex-1">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
-                                    <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>{deliveryInfo.time}</span>
+                        <div className="flex items-center justify-between gap-2">
+                            {/* Time & Location */}
+                            <div className="flex items-center gap-4 flex-1">
+                                <div className="flex flex-col gap-0.5 flex-1 max-w-[120px]">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                        <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span>{deliveryInfo.time}</span>
+                                    </div>
+                                    <span className="text-[10px] text-gray-400 font-medium pl-5 whitespace-nowrap">Order Arrival</span>
                                 </div>
-                                <span className="text-[10px] text-gray-400 font-medium pl-5">Delivery Window</span>
+
+                                <div className="w-px bg-gray-200 self-stretch mx-1" />
+
+                                <div className="flex flex-col gap-0.5 flex-1">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span className="truncate">{deliveryInfo.locationLabel.split('(')[0].trim()}</span>
+                                    </div>
+                                    <span className="text-[10px] text-gray-400 font-medium pl-5 truncate">
+                                        {deliveryInfo.locationLabel.match(/\((.*?)\)/)?.[1] || "Address"}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="w-px bg-gray-200 self-stretch mx-1" />
-
-                            <div className="flex flex-col gap-0.5 flex-1">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
-                                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span className="truncate">{deliveryInfo.locationLabel.split('(')[0].trim()}</span>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">
+                                    Locks @ {deliveryInfo.lockTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                                 </div>
-                                <span className="text-[10px] text-gray-400 font-medium pl-5 truncate max-w-[100px]">
-                                    {deliveryInfo.locationLabel.match(/\((.*?)\)/)?.[1] || "Address"}
-                                </span>
                             </div>
                         </div>
 
-                        {/* Row 2: Drink Status (Optional) */}
+                        {/* Optional drink info */}
                         {meal.includes_drink && (
-                            <div className="mt-1 pt-2 border-t border-gray-100 flex items-center gap-1.5 text-xs font-bold text-blue-600">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
+                            <div className="mt-1 pt-2 border-t border-gray-100 flex items-center gap-1.5 text-[10px] font-bold text-blue-600">
+                                <CheckCircle2 className="w-3 h-3" />
                                 <span>Drink Included</span>
                             </div>
                         )}
@@ -254,7 +262,7 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
 
             {/* Always Visible Details */}
             {!isSkipped && (
-                <div className={cn("px-4 pb-4", isLocked && "grayscale opacity-90")}>
+                <div className={cn("px-4 pb-4", (isLocked && !isDelivered) && "grayscale opacity-90")}>
                     {/* Description */}
                     <p className="text-sm text-gray-600 italic leading-relaxed mb-4">
                         "{meal.description}"

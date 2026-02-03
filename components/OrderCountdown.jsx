@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Timer, Calendar, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap, X } from "lucide-react";
+import { Timer, Calendar, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap, X, Clock } from "lucide-react";
 
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,7 +23,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
             accent: "bg-amber-500",
             glow: "shadow-amber-500/20",
             decoration: "bg-amber-500/10",
-            label: "Breakfast Lock-in",
+            label: "Breakfast",
         },
         lunch: {
             icon: Sun,
@@ -33,7 +33,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
             accent: "bg-blue-500",
             glow: "shadow-blue-500/20",
             decoration: "bg-blue-500/10",
-            label: "Lunch Lock-in",
+            label: "Lunch",
         },
         dinner: {
             icon: Sparkles,
@@ -43,7 +43,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
             accent: "bg-indigo-500",
             glow: "shadow-indigo-500/20",
             decoration: "bg-indigo-500/10",
-            label: "Dinner Lock-in",
+            label: "Dinner",
         }
     };
 
@@ -130,7 +130,7 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
                                     "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
                                     isUrgent ? "bg-red-200 text-red-700" : "bg-white/50 text-gray-400 border border-black/5"
                                 )}>
-                                    Status Check
+                                    Lock-in
                                 </span>
                                 {isUrgent && (
                                     <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-600 text-white animate-pulse">
@@ -142,8 +142,8 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", 
                             <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight leading-none">
                                 {label || currentTheme.label}
                             </h2>
-                            <p className="text-xs font-medium text-gray-500 leading-relaxed max-w-sm">
-                                Swaps and skips will be locked once the timer hits zero.
+                            <p className="text-[11px] font-medium text-gray-400 leading-snug max-w-[240px] text-center md:text-left group-hover:text-gray-500 transition-colors">
+                                Orders are finalized exactly <span className="text-gray-900 font-bold">60 minutes</span> prior to delivery to ensure kitchen and logistics precision.
                             </p>
                         </div>
                     </div>

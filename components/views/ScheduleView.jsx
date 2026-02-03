@@ -69,7 +69,7 @@ export const ScheduleView = () => {
                 const [h, m] = scheduleEntry.time.split(':').map(Number);
                 const startTime = new Date(now);
                 startTime.setHours(h, m, 0, 0);
-                const lockTime = new Date(startTime.getTime() - 30 * 60000);
+                const lockTime = new Date(startTime.getTime() - 60 * 60000); // 1 hour
 
                 return now < lockTime;
             });
@@ -537,7 +537,7 @@ export const ScheduleView = () => {
                             startTime.setHours(h, m, 0, 0);
                             const endTime = new Date(startTime);
                             endTime.setHours(h + 1);
-                            const lockTime = new Date(startTime.getTime() - 30 * 60000);
+                            const lockTime = new Date(startTime.getTime() - 60 * 60000); // 1 hour
 
                             isLocked = now >= lockTime;
                             isDelivered = now >= endTime;

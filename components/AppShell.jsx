@@ -9,7 +9,8 @@ import {
     Bell,
     Search,
     ChevronRight,
-    Linkedin
+    Linkedin,
+    Truck
 } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { clsx } from "clsx";
@@ -47,6 +48,7 @@ export const AppLayout = ({ children }) => {
 
     const NAV_ITEMS = [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
+        { id: "logistics", label: "Logistics", icon: Truck, path: "/LogisticsView" },
         { id: "schedule", label: "Schedule", icon: Calendar, path: "/Schedule" },
         { id: "taste-profile", label: "Taste Profile", icon: Heart, path: "/TasteProfile" },
         { id: "history", label: "Order History", icon: Clock, path: "/OrderHistory" },

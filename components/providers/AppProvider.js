@@ -216,10 +216,10 @@ export const AppProvider = ({ children }) => {
 
         // --- REAL-TIME INJECTION (TODAY) ---
         // If today's meals are "locked in" or delivered, show them.
-        // Thresholds: Breakfast 8:30am, Lunch 12:30pm, Dinner 7:00pm
-        const todayBF = new Date(now).setHours(8, 30, 0, 0);
-        const todayLN = new Date(now).setHours(12, 30, 0, 0);
-        const todayDN = new Date(now).setHours(19, 0, 0, 0);
+        // Thresholds: Breakfast 8:00am, Lunch 12:00pm, Dinner 18:30pm (1h before delivery)
+        const todayBF = new Date(now).setHours(8, 0, 0, 0);
+        const todayLN = new Date(now).setHours(12, 0, 0, 0);
+        const todayDN = new Date(now).setHours(18, 30, 0, 0);
 
         if (now.getTime() > todayBF) {
             const bf = pickMeal("breakfast");
@@ -467,7 +467,7 @@ export const AppProvider = ({ children }) => {
             d.setDate(d.getDate() + offsetDays);
             d.setHours(h, m, 0, 0);
 
-            return new Date(d.getTime() - 30 * 60000); // Subtract 30 mins
+            return new Date(d.getTime() - 60 * 60000); // Subtract 60 mins (1 hour)
         };
 
         // Helper: Create unique ID for a lock-in based on specific date
@@ -565,7 +565,7 @@ export const AppProvider = ({ children }) => {
         // Fallback if nothing found (e.g. no meals selected or all dismissed)
         const defaultTomorrow = new Date(now);
         defaultTomorrow.setDate(defaultTomorrow.getDate() + 1);
-        defaultTomorrow.setHours(9, 30, 0, 0);
+        defaultTomorrow.setHours(8, 0, 0, 0);
         return {
             id: createLockInId("Mon", "breakfast"), // Generic fallback ID
             expectedTime: defaultTomorrow.toISOString(),

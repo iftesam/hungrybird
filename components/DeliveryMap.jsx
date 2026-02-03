@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Bike, Compass } from "lucide-react";
+import { MapPin, Navigation, Bike, Compass, Truck } from "lucide-react";
 
 export const DeliveryMap = ({ status = "active" }) => {
     // If delivered, car stays at the end (100%)
@@ -69,7 +69,7 @@ export const DeliveryMap = ({ status = "active" }) => {
                     offsetRotate: "auto 0deg" // 0deg aligns correctly with the path direction for this SVG
                 }}
                 transition={isDelivered ? { duration: 0 } : {
-                    duration: 1800, // 30 minutes per loop
+                    duration: 3600, // 60 minutes (1 hour) per loop
                     repeat: Infinity,
                     ease: "linear"
                 }}
@@ -83,38 +83,23 @@ export const DeliveryMap = ({ status = "active" }) => {
                     <div className="absolute top-0 w-full h-full bg-gradient-to-r from-blue-400/30 via-blue-500/10 to-transparent blur-sm transform skew-y-3 scale-y-75" />
                 </div>
 
-                {/* Top-Down Car SVG */}
-                <div className="relative z-10 transform rotate-90 scale-90">
-                    <svg width="40" height="80" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-2xl">
-                        {/* Body Chassis */}
-                        <rect x="10" y="10" width="80" height="180" rx="20" fill="#1e293b" className="stroke-slate-700" strokeWidth="2" />
-                        <rect x="10" y="10" width="80" height="180" rx="20" fill="url(#car-gradient)" />
-
-                        {/* Windshield (Front) */}
-                        <path d="M 15 40 Q 50 35 85 40 L 85 70 Q 50 75 15 70 Z" fill="#0f172a" stroke="#334155" strokeWidth="1" />
-
-                        {/* Rear Window */}
-                        <path d="M 20 140 Q 50 145 80 140 L 80 160 Q 50 165 20 160 Z" fill="#0f172a" opacity="0.8" />
-
-                        {/* Roof */}
-                        <rect x="15" y="75" width="70" height="60" rx="5" fill="#334155" opacity="0.5" />
-
-                        {/* Headlights (Bright) */}
-                        <path d="M 12 10 Q 25 15 30 10" stroke="#60A5FA" strokeWidth="4" strokeLinecap="round" className="filter drop-shadow-[0_0_8px_rgba(96,165,250,1)]" />
-                        <path d="M 70 10 Q 75 15 88 10" stroke="#60A5FA" strokeWidth="4" strokeLinecap="round" className="filter drop-shadow-[0_0_8px_rgba(96,165,250,1)]" />
-
-                        {/* Taillights (Red) */}
-                        <rect x="12" y="185" width="20" height="5" rx="2" fill="#ef4444" className="filter drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                        <rect x="68" y="185" width="20" height="5" rx="2" fill="#ef4444" className="filter drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-
-                        <defs>
-                            <linearGradient id="car-gradient" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="0%" stopColor="#0f172a" />
-                                <stop offset="50%" stopColor="#334155" />
-                                <stop offset="100%" stopColor="#0f172a" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                {/* Truck Icon & Label */}
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center relative transform -scale-x-100">
+                        {/* -scale-x-100 flips the truck to face LEFT if needed, but standard lucide Truck faces RIGHT. 
+                           If the path goes Left->Right, we want it facing Right. 
+                           Standard icon faces Right. 
+                           Previous offsetRotate=auto 0deg aligns X axis to path.
+                           So no transform needed for direction, maybe just for style? 
+                           Actually, let's keep it simple. Standard Truck faces right. 
+                        */}
+                        <Truck className="w-6 h-6 text-gray-900" />
+                        {/* Hub Pulse - hardcoded for dashboard to match active feel */}
+                        <div className="absolute inset-0 rounded-xl animate-ping opacity-30 bg-emerald-500"></div>
+                    </div>
+                    <div className="absolute top-full mt-2 px-2 py-0.5 bg-black/80 backdrop-blur rounded text-[8px] font-bold text-white uppercase tracking-wider whitespace-nowrap border border-white/10 shadow-lg">
+                        Fulfiller
+                    </div>
                 </div>
             </motion.div>
 
