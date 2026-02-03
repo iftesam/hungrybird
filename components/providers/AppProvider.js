@@ -131,6 +131,11 @@ export const AppProvider = ({ children }) => {
     const [priorityNotes, setPriorityNotes] = useState(INITIAL_PRIORITY_NOTES);
 
     const [isHealthSynced, setIsHealthSynced] = useState(false);
+    const [deliverySchedule, setDeliverySchedule] = useState(INITIAL_SCHEDULE);
+    const [recurringCache, setRecurringCache] = useState({});
+    const [nextOrder, setNextOrder] = useState(null); // Return null initially to allow hydration
+    const [dismissedLockIns, setDismissedLockIns] = useState([]); // Track dismissed lock-ins with { id, expiryTime }
+    const [isLoaded, setIsLoaded] = useState(false);
 
 
     // --- LOGISTICS & HISTORY MOCK DATA ---
@@ -323,10 +328,8 @@ export const AppProvider = ({ children }) => {
     };
 
     // --- SMART LOGISTICS SCHEDULE ---
-    // --- SMART LOGISTICS SCHEDULE ---
     // Key: "Day_Meal" (e.g., "Mon_lunch") -> Value: { locationId, time }
-    const [deliverySchedule, setDeliverySchedule] = useState(INITIAL_SCHEDULE);
-    const [recurringCache, setRecurringCache] = useState({});
+
 
     // --- PERSISTENCE LOGIC ---
     useEffect(() => {
@@ -342,6 +345,7 @@ export const AppProvider = ({ children }) => {
                 const savedRestPrefs = localStorage.getItem("hb_restPrefs");
                 const savedHistory = localStorage.getItem("hb_history_2026");
                 const savedPriorityNotes = localStorage.getItem("hb_priority_notes");
+                const savedDismissed = localStorage.getItem("hb_dismissed_lockins");
                 let finalHistory = [];
 
                 if (savedProfile) setProfile({ ...INITIAL_PROFILE, ...JSON.parse(savedProfile) });
@@ -385,6 +389,13 @@ export const AppProvider = ({ children }) => {
                     });
                     setPriorityNotes(validNotes);
                 }
+                if (savedDismissed) {
+                    const parsedDismissed = JSON.parse(savedDismissed);
+                    // Filter out expired ones immediately on load
+                    const now = new Date();
+                    const validDismissed = parsedDismissed.filter(d => new Date(d.expiryTime) > now);
+                    setDismissedLockIns(validDismissed);
+                }
                 if (savedHistory) {
                     finalHistory = JSON.parse(savedHistory);
                     setHistory(finalHistory);
@@ -424,23 +435,21 @@ export const AppProvider = ({ children }) => {
     useEffect(() => {
         if (typeof window !== "undefined") {
             localStorage.setItem("hb_profile", JSON.stringify(profile));
-            localStorage.setItem("hb_addresses", JSON.stringify(addresses));
-            localStorage.setItem("hb_addresses", JSON.stringify(addresses));
             localStorage.setItem("hb_schedule", JSON.stringify(deliverySchedule));
-            localStorage.setItem("hb_mealPlan", JSON.stringify(mealPlan)); // Save
+            localStorage.setItem("hb_mealPlan", JSON.stringify(mealPlan));
             localStorage.setItem("hb_financials", JSON.stringify(financials));
             localStorage.setItem("hb_cuisines", JSON.stringify(cuisines));
             localStorage.setItem("hb_mealPrefs", JSON.stringify(mealPrefs));
-            localStorage.setItem("hb_mealPrefs", JSON.stringify(mealPrefs));
             localStorage.setItem("hb_restPrefs", JSON.stringify(restaurantPrefs));
             localStorage.setItem("hb_priority_notes", JSON.stringify(priorityNotes));
+            localStorage.setItem("hb_dismissed_lockins", JSON.stringify(dismissedLockIns));
 
             // Only save history if it's populated
             if (history && history.length > 0) {
                 localStorage.setItem("hb_history_2026", JSON.stringify(history));
             }
         }
-    }, [profile, addresses, deliverySchedule, mealPlan, financials, cuisines, mealPrefs, restaurantPrefs, history, priorityNotes]);
+    }, [profile, addresses, deliverySchedule, mealPlan, financials, cuisines, mealPrefs, restaurantPrefs, history, priorityNotes, dismissedLockIns]);
 
     // --- MEAL WINDOW LOGIC ---
     const calculateNextWindow = () => {
@@ -461,6 +470,28 @@ export const AppProvider = ({ children }) => {
             return new Date(d.getTime() - 30 * 60000); // Subtract 30 mins
         };
 
+        // Helper: Create unique ID for a lock-in based on specific date
+        const createLockInId = (date, type) => {
+            const dateStr = new Date(date).toDateString();
+            return `${dateStr}_${type}`;
+        };
+
+        // Helper: Check if a specific lock-in is dismissed
+        const isDismissed = (date, type) => {
+            const id = createLockInId(date, type);
+            return dismissedLockIns.some(dismissed => dismissed.id === id);
+        };
+
+        // Helper: Check if any dismissed lock-in is still active (not expired)
+        const hasActiveDismissedLockIn = () => {
+            return dismissedLockIns.some(dismissed => new Date(dismissed.expiryTime) > now);
+        };
+
+        // If there's an active dismissed lock-in, don't show anything yet
+        if (hasActiveDismissedLockIn()) {
+            return { isHidden: true };
+        }
+
         // Smart Filtering: Only consider active preferences that are NOT skipped
         const isEligible = (type) => mealPrefs.includes(type) && !skipped.includes(type);
 
@@ -473,58 +504,79 @@ export const AppProvider = ({ children }) => {
         const lunchLockIn = lunchSlot ? getLockInFromTime(lunchSlot.time) : null;
         const dinnerLockIn = dinnerSlot ? getLockInFromTime(dinnerSlot.time) : null;
 
-        // Check Future Lock-ins Today
-        if (breakfastLockIn > now) {
-            return { expectedTime: breakfastLockIn.toISOString(), label: "Breakfast", status: "Scheduled", type: "breakfast" };
-        }
-
-        if (lunchLockIn > now) {
-            return { expectedTime: lunchLockIn.toISOString(), label: "Lunch", status: "Scheduled", type: "lunch" };
-        }
-
-        if (dinnerLockIn > now) {
-            return { expectedTime: dinnerLockIn.toISOString(), label: "Dinner", status: "Scheduled", type: "dinner" };
-        }
-
-        // Check Tomorrow's Early Slots (Wrap around)
-        const nextDayIndex = (now.getDay() + 1) % 7;
-        const nextDayStr = days[nextDayIndex];
-
-        // Find the first eligible meal for tomorrow
-        const tomorrowTypes = ["breakfast", "lunch", "dinner"];
-        for (const type of tomorrowTypes) {
-            if (isEligible(type)) { // We assume skipped is reset or persisted? Skipped is for "specific meal instance" usually but here it's "type". 
-                // Actually, skipped list is ["breakfast", "lunch"] etc. which implies TODAY? 
-                // If skipped implies "I'm skipping this slot specifically", usually it resets daily.
-                // However, our current simple model `skipped` is likely global or manual toggle.
-                // If user skipped "Breakfast", do they mean "This morning" or "Forever"?
-                // Given `skipped` array logic in ScheduleView seems to be toggle-based, let's assume it applies to the 'current' view.
-                // For tomorrow, we should probably mostly care about `mealPrefs`.
-                // But let's respect it if it's there, simply to avoid confusion if they just clicked it.
-                const slot = deliverySchedule[`${nextDayStr}_${type}`];
-                if (slot) {
-                    const lockIn = getLockInFromTime(slot.time, 1);
-                    if (lockIn > now) {
-                        return { expectedTime: lockIn.toISOString(), label: `${type.charAt(0).toUpperCase() + type.slice(1)}`, status: "Scheduled", type };
-                    }
-                }
-            }
-
-            // Fallback if nothing found (e.g. no meals selected)
-            const defaultTomorrow = new Date(now);
-            defaultTomorrow.setDate(defaultTomorrow.getDate() + 1);
-            defaultTomorrow.setHours(9, 30, 0, 0);
+        // Check Future Lock-ins Today (Skip Dismissed)
+        if (breakfastLockIn > now && !isDismissed(now, "breakfast")) {
             return {
-                expectedTime: defaultTomorrow.toISOString(),
-                label: "Next Meal",
+                id: createLockInId(now, "breakfast"),
+                expectedTime: breakfastLockIn.toISOString(),
+                label: "Breakfast",
                 status: "Scheduled",
                 type: "breakfast"
             };
+        }
+
+        if (lunchLockIn > now && !isDismissed(now, "lunch")) {
+            return {
+                id: createLockInId(now, "lunch"),
+                expectedTime: lunchLockIn.toISOString(),
+                label: "Lunch",
+                status: "Scheduled",
+                type: "lunch"
+            };
+        }
+
+        if (dinnerLockIn > now && !isDismissed(now, "dinner")) {
+            return {
+                id: createLockInId(now, "dinner"),
+                expectedTime: dinnerLockIn.toISOString(),
+                label: "Dinner",
+                status: "Scheduled",
+                type: "dinner"
+            };
+        }
+
+        // Check Tomorrow's Slots and beyond (up to 7 days ahead)
+        for (let dayOffset = 1; dayOffset <= 7; dayOffset++) {
+            const targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() + dayOffset);
+            const targetDayStr = days[targetDate.getDay()];
+
+            // Try each meal type for this day
+            const mealTypes = ["breakfast", "lunch", "dinner"];
+            for (const type of mealTypes) {
+                if (isEligible(type)) {
+                    const slot = deliverySchedule[`${targetDayStr}_${type}`];
+                    if (slot && !isDismissed(targetDate, type)) {
+                        const lockIn = getLockInFromTime(slot.time, dayOffset);
+                        if (lockIn > now) {
+                            return {
+                                id: createLockInId(targetDate, type),
+                                expectedTime: lockIn.toISOString(),
+                                label: `${type.charAt(0).toUpperCase() + type.slice(1)}`,
+                                status: "Scheduled",
+                                type
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback if nothing found (e.g. no meals selected or all dismissed)
+        const defaultTomorrow = new Date(now);
+        defaultTomorrow.setDate(defaultTomorrow.getDate() + 1);
+        defaultTomorrow.setHours(9, 30, 0, 0);
+        return {
+            id: createLockInId("Mon", "breakfast"), // Generic fallback ID
+            expectedTime: defaultTomorrow.toISOString(),
+            label: "Next Meal",
+            status: "Scheduled",
+            type: "breakfast"
         };
     };
 
-    const [nextOrder, setNextOrder] = useState(null); // Return null initially to allow hydration
-    const [isLoaded, setIsLoaded] = useState(false);
+    // Removed redundant setIsLoaded effect - now set in localStorage loading logic
+
 
     // Removed redundant setIsLoaded effect - now set in localStorage loading logic
 
@@ -539,7 +591,7 @@ export const AppProvider = ({ children }) => {
             setNextOrder(calculateNextWindow());
         }, 30000); // Check every 30s
         return () => clearInterval(interval);
-    }, [addresses, deliverySchedule, mealPrefs, skipped, isLoaded]); // Re-calc if ANY scheduling factor changes
+    }, [addresses, deliverySchedule, mealPrefs, skipped, isLoaded, dismissedLockIns]); // Re-calc if ANY scheduling factor changes
 
     // Derived Financial Metrics
     const remainingBudget = financials.monthlyBudget - financials.spent;
@@ -866,13 +918,23 @@ export const AppProvider = ({ children }) => {
                     rejectionReason = `Invalid Slot: You don't have ${requestedMeal.charAt(0).toUpperCase() + requestedMeal.slice(1)} enabled in your schedule.`;
                 }
 
-                // 5. VALIDATE SPECIFICITY (Basic NLP Check)
-                // If it's too vague, e.g., "I am hungry"
-                const foodKeywords = ["pizza", "burger", "salad", "tacos", "sushi", "pasta", "steak", "chicken", "rice", "sandwich", "soup", "curry", "nihari", "pakwan"];
-                const hasFood = foodKeywords.some(w => textLower.includes(w)) || textLower.length > 15; // Assumption: specific requests are longer
+                // 5. VALIDATE ALLERGIES / EXCLUSIONS (Hard Rule)
+                if (profile.allergies && profile.allergies.length > 0) {
+                    const matchedExclusion = profile.allergies.find(e => textLower.includes(e.toLowerCase()));
+                    if (matchedExclusion) {
+                        rejectionReason = `Dietary Restriction: Your request contains ${matchedExclusion}, which is in your Ingredient Exclusions list.`;
+                    }
+                }
 
-                if (!hasFood && !requestedMeal) {
-                    rejectionReason = "Request Unclear: Please specify a meal type (Dinner) or a specific dish.";
+                if (!rejectionReason) {
+                    // 6. VALIDATE SPECIFICITY (Basic NLP Check)
+                    // If it's too vague, e.g., "I am hungry"
+                    const foodKeywords = ["pizza", "burger", "salad", "tacos", "sushi", "pasta", "steak", "chicken", "rice", "sandwich", "soup", "curry", "nihari", "pakwan"];
+                    const hasFood = foodKeywords.some(w => textLower.includes(w)) || textLower.length > 15; // Assumption: specific requests are longer
+
+                    if (!hasFood && !requestedMeal) {
+                        rejectionReason = "Request Unclear: Please specify a meal type (Dinner) or a specific dish.";
+                    }
                 }
 
                 if (rejectionReason) {
@@ -934,30 +996,12 @@ export const AppProvider = ({ children }) => {
         setPriorityNotes(prev => prev.filter(n => n.id !== id));
     };
 
-    const approvePriorityNote = (id) => {
-        setPriorityNotes(prev => prev.map(note => {
-            if (note.id !== id) return note;
-            return {
-                ...note,
-                status: "approved",
-                rejectionReason: null,
-                tags: {
-                    target: "Manual Override",
-                    cuisine: "Custom Request"
-                }
-            };
-        }));
-    };
 
-    const declinePriorityNote = (id, reason = "Manual Rejection") => {
-        setPriorityNotes(prev => prev.map(note => {
-            if (note.id !== id) return note;
-            return {
-                ...note,
-                status: "declined",
-                rejectionReason: reason
-            };
-        }));
+
+    const dismissLockIn = (lockInId, expiryTime) => {
+        setDismissedLockIns(prev => [...prev, { id: lockInId, expiryTime }]);
+        // Force immediate hidden state for UI snappiness
+        setNextOrder({ isHidden: true });
     };
 
     const value = {
@@ -1011,9 +1055,8 @@ export const AppProvider = ({ children }) => {
             authorizeBudgetIncrease,
             addPriorityNote, // Expose
             removePriorityNote, // Expose
-            approvePriorityNote,
-            declinePriorityNote,
-            setIsHealthSynced
+            setIsHealthSynced,
+            dismissLockIn // New dismiss action
         }
     };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Timer, Calendar, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap } from "lucide-react";
+import { Timer, Calendar, Sun, Moon, Sunrise, Cloud, Sparkles, UtensilsCrossed, Info, ChevronRight, Zap, X } from "lucide-react";
 
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,7 +9,7 @@ import { twMerge } from "tailwind-merge";
 
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
-export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }) => {
+export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner", onDismiss }) => {
     const [timeLeft, setTimeLeft] = useState({ h: "00", m: "00", s: "00" });
     const [isUrgent, setIsUrgent] = useState(false);
 
@@ -91,6 +91,26 @@ export const OrderCountdown = ({ targetDate, label, onAdjust, theme = "dinner" }
                 "absolute top-0 right-0 w-48 h-48 rounded-bl-[120px] -mr-12 -mt-12 transition-transform duration-700 group-hover:scale-110 pointer-events-none opacity-40",
                 isUrgent ? "bg-red-500/10" : currentTheme.decoration
             )} />
+
+            {/* Google Material-You Dismiss Button */}
+            {onDismiss && (
+                <motion.button
+                    onClick={onDismiss}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={cn(
+                        "absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group/dismiss",
+                        isUrgent
+                            ? "bg-white/80 hover:bg-white border-red-200 hover:border-red-300 text-red-600 hover:text-red-700 shadow-red-500/20"
+                            : "bg-white/60 hover:bg-white/90 border-gray-200/50 hover:border-gray-300 text-gray-600 hover:text-gray-900 shadow-black/10"
+                    )}
+                    aria-label="Dismiss lock-in"
+                >
+                    <X className="w-4 h-4 transition-transform group-hover/dismiss:rotate-90" strokeWidth={2.5} />
+                </motion.button>
+            )}
 
             <div className="relative z-10 p-5 md:p-6">
                 <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6">

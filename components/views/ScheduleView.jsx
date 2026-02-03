@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, CheckCircle2, DollarSign, XCircle, PlusCircle, Clock, Timer, ChevronDown, ChevronUp, MapPin, Search, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, CheckCircle2, DollarSign, XCircle, PlusCircle, Clock, Timer, ChevronDown, ChevronUp, MapPin, Search, Lock, Sparkles } from "lucide-react";
 import { MEALS } from "@/data/meals";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "@/components/providers/AppProvider";
@@ -34,39 +34,37 @@ const MEAL_ORDER = ["breakfast", "lunch", "dinner"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 import { OrderCountdown } from "@/components/OrderCountdown";
-import { findSmartSwap } from "@/utils/SwapLogistics";
+import { findSmartSwap, isMealSafe } from "@/utils/SwapLogistics";
 import { MealCard } from "@/components/MealCard";
 import { BudgetModal } from "@/components/BudgetModal";
 
-// --- SMART TIMER HOOK REMOVED (Logic moved to per-meal basis) ---
-
-// --- RICH MEAL CARD COMPONENT ---
-
 
 export const ScheduleView = () => {
+    // 1. Context & State Hooks
     const { profile, cuisines, mealPrefs, restaurantPrefs, financials, addresses, skipped, actions, deliverySchedule, mealPlan, isLoaded, isConfigured, missingConfig, priorityNotes, reviews } = useAppContext();
 
-    // Timer Logic: Check if everything is processed for specific "All Done" state
-    // We re-use this check in the render, but we can memoize the global status if needed.
-    // IMPORTANT: This useState must be called BEFORE any conditional returns to follow Rules of Hooks
     const [isAllOrdersLocked, setIsAllOrdersLocked] = useState(false);
+    const [budgetModal, setBudgetModal] = useState({ isOpen: false, data: null });
 
-    // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+    // Constants for hooks
+    const TAX_RATE = 0.08875;
+    const TARGET_DAILY = profile?.dailyAllowance || 60;
+
+    // 2. Effect Hooks
     useEffect(() => {
-        if (!isLoaded) return; // Skip effect if not loaded yet
+        if (!isLoaded) return;
 
         const checkAllLocked = () => {
             const now = new Date();
             const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
             const currentDayStr = days[now.getDay()];
 
-            // Check if ANY meal is still pending (unlocked)
             const hasPending = mealPrefs.some(type => {
-                if (skipped.includes(type)) return false; // Skipped doesn't count as pending
+                if (skipped.includes(type)) return false;
 
                 const key = `${currentDayStr}_${type}`;
                 const scheduleEntry = deliverySchedule[key];
-                if (!scheduleEntry) return false; // Default unlocked? Or treat as no order? Treat as processed/ignore.
+                if (!scheduleEntry) return false;
 
                 const [h, m] = scheduleEntry.time.split(':').map(Number);
                 const startTime = new Date(now);
@@ -84,68 +82,22 @@ export const ScheduleView = () => {
         return () => clearInterval(i);
     }, [isLoaded, mealPrefs, skipped, deliverySchedule]);
 
-    if (!isLoaded) return null; // Wait for hydration
-
-    // --- SETUP REQUIRED STATE ---
-    const configContent = !isConfigured ? (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 animate-in fade-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                <AlertCircle className="w-10 h-10 text-gray-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Setup Required</h2>
-            <p className="text-gray-500 max-w-sm mb-8">
-                We need a bit more info to generate your schedule. Please complete your profile to continue.
-            </p>
-
-            <div className="w-full max-w-xs space-y-3 mb-8">
-                {missingConfig.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100">
-                        <XCircle className="w-4 h-4 shrink-0" />
-                        Missing {item}
-                    </div>
-                ))}
-            </div>
-
-            <p className="text-xs text-gray-400">
-                Visit the <span className="font-bold text-gray-600">Profile Tab</span> to update your settings.
-            </p>
-        </div>
-    ) : null;
-
-    // Financial Constants
-    const TAX_RATE = 0.08875; // ~8.8-9% Tax
-    const TARGET_DAILY = profile.dailyAllowance || 60; // Use setting directly as source of truth
-
-    // --- SMART FILTERING ENGINE ---
+    // 3. Memoized Logic Hooks (Re-ordered to top)
     const validMeals = useMemo(() => {
-        // Strict Mode: If no cuisines selected, show everything (or show nothing? Let's assume everything if empty selection, but user said 'strict').
-        // AppProvider initializes cuisines with default.
+        if (!isLoaded) return [];
         if (cuisines.length === 0) return MEALS;
 
         return MEALS.filter(meal => {
-            // 1. Review Check - Exclude Disliked Meals
             if (reviews[meal.name]?.liked === false) return false;
 
-            // 2. Cuisine Check
             const activeCuisines = cuisines.map(c => CUISINE_MAP[c]);
-            // Check both strict cuisine field and tags for flexibility
-            // We use optional chaining and strict matching
             const matchesCuisine = activeCuisines.some(c =>
                 c && (meal.cuisine.includes(c) || meal.tags.includes(c))
             );
             if (!matchesCuisine) return false;
 
-            // 3. Strict Dietary & Allergy Check
+            if (!isMealSafe(meal, profile.allergies)) return false;
 
-            // A. Allergies (MUST NOT contain)
-            if (profile.allergies && profile.allergies.length > 0) {
-                const hasAllergy = profile.allergies.some(allergy => {
-                    return meal.allergens.includes(allergy);
-                });
-                if (hasAllergy) return false;
-            }
-
-            // B. Diet Constraints
             if (profile.diet.includes("Vegan") && !meal.dietary.vegan) return false;
             if (profile.diet.includes("Vegetarian") && !meal.dietary.vegetarian) return false;
             if (profile.diet.includes("Halal") && !meal.dietary.halal) return false;
@@ -153,7 +105,6 @@ export const ScheduleView = () => {
             if (profile.diet.includes("Keto") && !meal.tags.includes("Keto-Friendly")) return false;
             if (profile.diet.includes("Spicy") && !meal.tags.includes("Spicy")) return false;
 
-            // 4. Restaurant Preference Check
             const hasWildcard = restaurantPrefs.includes("wildcard");
             if (!hasWildcard) {
                 const matchesTier = restaurantPrefs.some(pref => {
@@ -166,31 +117,24 @@ export const ScheduleView = () => {
 
             return true;
         });
-    }, [profile, cuisines, restaurantPrefs, reviews]);
+    }, [profile, cuisines, restaurantPrefs, reviews, isLoaded]);
 
-    // Simplified destructuring (moved to lower block where needed)
+    const schedule = mealPlan?.items || {};
+    const swapCounts = mealPlan?.meta?.swapCounts || {};
 
-    // Alias explicitly for clarity
-    const schedule = mealPlan.items || {};
-    // const swapIndices = mealPlan.meta?.swapIndices || {}; 
-    // We now use swapCounts (monotonic increment)
-    const swapCounts = mealPlan.meta?.swapCounts || {};
-
-    // --- DYNAMIC OPTION COUNTING ---
-    // Calculate how many swap options exist for each slot (Current + Alternatives)
     const swapOptionsMap = useMemo(() => {
+        if (!isLoaded) return {};
         const map = {};
         const context = { profile, financials, cuisines, restaurantPrefs, mealPrefs };
         MEAL_ORDER.forEach(type => {
-            const candidates = findSmartSwap(type, mealPlan.items, context);
+            const candidates = findSmartSwap(type, schedule, context);
             map[type] = candidates?.length || 1;
 
-            // Also calculate for each specific item in case roles differ
-            const itemsInSlot = mealPlan.items[type] || [];
+            const itemsInSlot = schedule[type] || [];
             itemsInSlot.forEach(item => {
                 if (item.role === "guest") {
                     const host = itemsInSlot.find(i => i.role === "host") || itemsInSlot[0];
-                    const guestCandidates = findSmartSwap(type, mealPlan.items, { ...context, requiredRestaurant: host.vendor.name });
+                    const guestCandidates = findSmartSwap(type, schedule, { ...context, requiredRestaurant: host.vendor.name });
                     map[item.id] = guestCandidates?.length || 1;
                 } else {
                     map[item.id] = map[type];
@@ -198,16 +142,14 @@ export const ScheduleView = () => {
             });
         });
         return map;
-    }, [schedule, profile, financials, cuisines, restaurantPrefs, mealPrefs]);
+    }, [schedule, profile, financials, cuisines, restaurantPrefs, mealPrefs, isLoaded]);
 
-    // --- SMART GENERATION LOGIC ---
+    // 4. Generation Effect Hook (Re-ordered to top)
     useEffect(() => {
-        // Wait for localStorage to load before generating
         if (!isLoaded) return;
 
-        // 1. Strict Mode Validation
         if (validMeals.length === 0) {
-            if (Object.keys(schedule).length > 0) updateMealPlan({ items: {}, meta: { budget: 0 } });
+            if (Object.keys(schedule).length > 0) actions.updateMealPlan({ items: {}, meta: { budget: 0 } });
             return;
         }
 
@@ -217,12 +159,6 @@ export const ScheduleView = () => {
         const maxPreTaxTotal = TARGET_DAILY / (1 + TAX_RATE);
         const budgetPerSlot = maxPreTaxTotal / activeSlots;
 
-        // PERSISTENCE CHECK:
-        // Only regenerate if:
-        // 1. Plan is empty
-        // 2. Budget has changed significantly (using integer check to avoid float noise)
-        // 3. Current meals are invalid? (Optional, but let's trust the meta check first)
-
         const currentBudgetHash = Math.round(maxPreTaxTotal);
         const savedBudgetHash = Math.round(mealPlan.meta?.budget || 0);
 
@@ -230,94 +166,57 @@ export const ScheduleView = () => {
         const budgetUnchanged = currentBudgetHash === savedBudgetHash;
         const hasSwapHistory = swapCounts && Object.keys(swapCounts).length > 0;
 
-        // If we have a valid schedule and budget hasn't changed, DO NOT REGENERATE.
-        // Also protect if user has swap history (manual swaps).
-        // This preserves manual swaps across refreshes.
-        if ((hasValidSchedule && budgetUnchanged) || hasSwapHistory) {
+        const hasIllegalMeal = Object.values(schedule).flat().some(meal => !isMealSafe(meal, profile.allergies));
+
+        if (!hasIllegalMeal && ((hasValidSchedule && budgetUnchanged) || hasSwapHistory)) {
             return;
         }
 
         // --- GENERATION START ---
         let newSchedule = {};
-
-        // STRATEGY SELECTION
-        // "Value" (<$35): Focus on Budget Savers (<$12)
-        // "Anchor" ($35-$70): 1 Hero Item ($20+) + Savers
-        // "Feast" (>$70): Anything goes
-
         let strategy = "balanced";
         if (maxPreTaxTotal < 35) strategy = "value";
         else if (maxPreTaxTotal > 70) strategy = "feast";
         else strategy = "anchor";
 
-        // Sort pools for efficiency
-        // Cheap -> Expensive
         const sortedPool = [...validMeals].sort((a, b) => a.price - b.price);
 
-        // Helper: Get best meal for a target price with some variety
-        // Now with Review-Aware Scoring!
-        const getMealScore = (meal) => {
-            const review = reviews[meal.name];
-            if (!review) return 1; // Base score for unreviewed
-            if (review.isFavorite) return 10; // Highest priority
-            if (review.liked === true) return 5; // Medium priority
-            if (review.liked === false) return 0; // Should be filtered out already
-            return 1;
-        };
-
         const pickMeal = (type, targetPrice, variance = 5) => {
-            // 1. Try Strict Match in Filtered Pool (Cuisine + Time + Price)
             let candidates = sortedPool.filter(m =>
                 m.meal_time.includes(type) &&
                 Math.abs(m.price - targetPrice) <= variance
             );
 
-            // 2. Fallback: Strict Match in Filtered Pool (Cuisine + Time Only)
             if (candidates.length === 0) {
                 candidates = sortedPool.filter(m => m.meal_time.includes(type));
             }
 
-            // 3. Global Fallback: If Filtered Pool has NO items for this time (e.g. data gap for Cuisine)
-            // Go to Global MEALS but Enforce Diet/Allergy + Time
             if (candidates.length === 0) {
-                // We need to re-apply basic diet filters to the global list for safety
                 candidates = MEALS.filter(m => {
                     if (!m.meal_time.includes(type)) return false;
-                    // Exclude dislikes
                     if (reviews[m.name]?.liked === false) return false;
-
-                    // Re-run basic diet checks from the main filter
-                    // (We can assume if they weren't in sortedPool, it was due to Cuisine or Diet)
-                    // We want to relax Cuisine but KEEP Diet.
-                    if (profile.allergies && profile.allergies.some(a => m.allergens.includes(a))) return false;
+                    if (!isMealSafe(m, profile.allergies)) return false;
                     if (profile.diet.includes("Vegan") && !m.dietary.vegan) return false;
                     if (profile.diet.includes("Vegetarian") && !m.dietary.vegetarian) return false;
                     if (profile.diet.includes("Halal") && !m.dietary.halal) return false;
-
                     return true;
                 });
 
-                // If we found global candidates, filter by price if possible
                 if (candidates.length > 0) {
                     const priceMatches = candidates.filter(m => Math.abs(m.price - targetPrice) <= variance);
                     if (priceMatches.length > 0) candidates = priceMatches;
                 }
             }
 
-            // 4. Critical Fail-safe: Just return null if truly nothing exists (should be impossible with rich data)
             if (candidates.length === 0) return null;
 
-            // 5. REVIEW-AWARE SELECTION
-            // First, try to find favorites that fit the budget
             const favorites = candidates.filter(m => reviews[m.name]?.isFavorite);
             if (favorites.length > 0) {
-                // Sort favorites by price proximity
                 favorites.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
                 const limit = Math.min(favorites.length, 3);
                 return favorites[Math.floor(Math.random() * limit)];
             }
 
-            // Next, try liked meals
             const liked = candidates.filter(m => reviews[m.name]?.liked === true);
             if (liked.length > 0) {
                 liked.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
@@ -325,50 +224,30 @@ export const ScheduleView = () => {
                 return liked[Math.floor(Math.random() * limit)];
             }
 
-            // Finally, fall back to unreviewed meals
-            // Sort by price proximity to target first
             candidates.sort((a, b) => Math.abs(a.price - targetPrice) - Math.abs(b.price - targetPrice));
-
             const limit = Math.min(candidates.length, 5);
             return candidates[Math.floor(Math.random() * limit)];
         };
 
         if (strategy === "value") {
-            // Strategy: STRICT Value
-            // Calculate minimum possible cost for the slots
-            // If budget is tight, we shouldn't aim for 'average', we should aim for 'floor'
-            // AppProvider initializes cuisines with default.
-
             mealPrefs.forEach(type => {
-                // Find cheapest possible meal for this slot to start with
-                // Try from sortedPool first, then global fallback if necessary
                 let cheapest = sortedPool.filter(m => m.meal_time.includes(type))[0];
                 if (!cheapest) {
-                    // Global fallback for base price check
                     cheapest = MEALS.filter(m => m.meal_time.includes(type)).sort((a, b) => a.price - b.price)[0];
                 }
-
                 const basePrice = cheapest ? cheapest.price : budgetPerSlot;
-
-                // Pick something very close to the floor price
                 newSchedule[type] = pickMeal(type, basePrice, 2);
             });
         }
         else if (strategy === "anchor") {
-            // Strategy: Pick ONE "Hero" meal (Dinner -> Lunch -> Breakfast priority)
-            // Allocate 50-60% of budget to Hero, rest to others
-
             const heroSlot = mealPrefs.includes("dinner") ? "dinner" : (mealPrefs.includes("lunch") ? "lunch" : "breakfast");
             const saverSlots = mealPrefs.filter(p => p !== heroSlot);
-
-            // 1. Pick Hero (Aim for top 30% of price range or ~$25-35)
             const heroBudget = Math.min(maxPreTaxTotal * 0.6, 40);
 
-            // Hero Logic: Explicitly look for "Top Tier" or expensive items
             const heroCandidates = sortedPool.filter(m =>
                 m.meal_time.includes(heroSlot) &&
                 (m.price >= 20 || m.tags.includes("Top Tier")) &&
-                m.price <= heroBudget + 5 // Don't blow the WHOLE budget
+                m.price <= heroBudget + 5
             );
 
             if (heroCandidates.length > 0) {
@@ -377,115 +256,73 @@ export const ScheduleView = () => {
                 newSchedule[heroSlot] = pickMeal(heroSlot, heroBudget);
             }
 
-            // 2. Fill Savers with REMAINING budget
             const heroPrice = newSchedule[heroSlot] ? newSchedule[heroSlot].price : 0;
             const remainingBudget = maxPreTaxTotal - heroPrice;
             const saverBudget = Math.max(0, remainingBudget / saverSlots.length);
 
             saverSlots.forEach(type => {
-                // Force cheap picks for savers
-                // Use a small variance to stick to the budget
                 newSchedule[type] = pickMeal(type, Math.min(saverBudget, 12), 3);
             });
-
         }
         else {
-            // Strategy: Feast (Random High Quality)
             mealPrefs.forEach(type => {
-                // Just pick nice things around the generous average
                 newSchedule[type] = pickMeal(type, budgetPerSlot, 10);
             });
         }
 
-        // Final Validation: Remove any accidental nulls (sanity check)
         mealPrefs.forEach(type => {
             if (!newSchedule[type]) {
-                // Last ditch effort: Grab absolute cheapest ANY meal for this time
                 newSchedule[type] = MEALS.filter(m => m.meal_time.includes(type)).sort((a, b) => a.price - b.price)[0];
             }
         });
 
-        // --- "SWAP POLISH" (Fix for Default Values) ---
-        // As requested: "Swap once by default".
-        // We run the Smart Swap engine on the draft schedule to enforce strict constraints and "smartness".
         const context = { profile, financials, cuisines, restaurantPrefs, mealPrefs };
-
-        // Iterate through slots and refine them using the Swap Engine
         mealPrefs.forEach(type => {
-            // function findSmartSwap(currentMealType, currentSchedule, context)
             const candidates = findSmartSwap(type, newSchedule, context);
-
-            // If swap engine finds valid candidates, upgrade the slot
-            // This ensures strict filtering (Cuisine/Diet) is respected exactly like the manual swap button
             if (candidates && candidates.length > 0) {
-                // Pick the top scored candidate
                 newSchedule[type] = candidates[0];
             }
         });
 
-        let currentTotal = Object.values(newSchedule).reduce((a, b) => a + b.price, 0);
-
-        // Optimization Loop - STRICT BUDGET ENFORCEMENT
-        // We iterate repeatedly as long as we are over budget
+        let currentTotal = Object.values(newSchedule).reduce((a, b) => a + (b?.price || 0), 0);
         let optimizationPasses = 0;
         const MAX_PASSES = 20;
 
         while (currentTotal > maxPreTaxTotal && optimizationPasses < MAX_PASSES) {
-            // 1. Sort current selection by price (Desc) to target expensive ones first
             const currentSelection = mealPrefs
                 .map(type => ({ type, ...newSchedule[type] }))
-                .filter(item => item.id) // check valid
+                .filter(item => item.id)
                 .sort((a, b) => b.price - a.price);
 
             let changedSomething = false;
-
-            // 2. Iterate through selection to find ANY swap that reduces cost
             for (const item of currentSelection) {
                 const type = item.type;
                 const currentPrice = item.price;
-
-                // Find strictly cheaper options from the valid pool for this specific time slot
-                // Sort by price ascending (cheapest first) to maximize impact
                 const cheaperOptions = sortedPool
                     .filter(m => m.meal_time.includes(type) && m.price < currentPrice)
                     .sort((a, b) => a.price - b.price);
 
                 if (cheaperOptions.length > 0) {
-                    // Swap to the cheapest available option
                     const adoption = cheaperOptions[0];
                     newSchedule[type] = adoption;
                     currentTotal -= (currentPrice - adoption.price);
                     changedSomething = true;
-
-                    // Break inner loop to re-evaluate 'currentTotal' against 'maxPreTaxTotal'
                     break;
                 }
             }
-
-            if (!changedSomething) {
-                break; // Hard floor reached
-            }
+            if (!changedSomething) break;
             optimizationPasses++;
         }
 
-        // --- PRIORITY NOTES OVERRIDE (GATEKEEPER) ---
-        // Check for any "Approved" overrides and apply them forcefully
         const activeOverrides = priorityNotes.filter(n => n.status === "approved" && n.logic);
-
         activeOverrides.forEach(note => {
-            // For Demo: We assume the current view IS the target day (or ignored)
-            // In a real app, we'd check if (note.logic.day === currentDay)
-
-            const targetTime = note.logic.time; // "dinner"
+            const targetTime = note.logic.time;
             const forcedMeal = note.logic.meal;
-
             if (forcedMeal && mealPrefs.includes(targetTime)) {
                 newSchedule[targetTime] = forcedMeal;
             }
         });
 
-        // SAVE TO CONTEXT (PERSISTANCE)
-        // Transform the generated items into the new array-based structure
         const arrayBasedItems = {};
         Object.keys(newSchedule).forEach(slot => {
             if (newSchedule[slot]) {
@@ -500,7 +337,7 @@ export const ScheduleView = () => {
             }
         });
 
-        updateMealPlan({
+        actions.updateMealPlan({
             items: arrayBasedItems,
             meta: {
                 ...mealPlan.meta,
@@ -509,35 +346,59 @@ export const ScheduleView = () => {
         });
     }, [mealPrefs, validMeals, TARGET_DAILY, mealPlan.meta?.budget, isLoaded, priorityNotes, reviews]);
 
-    const [budgetModal, setBudgetModal] = useState({ isOpen: false, data: null });
+    // 5. Early Return Guards
+    if (!isLoaded) return null;
 
-    const items = mealPlan.items || {};
+    if (!isConfigured) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 animate-in fade-in zoom-in-95 duration-500">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <AlertCircle className="w-10 h-10 text-gray-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">Setup Required</h2>
+                <p className="text-gray-500 max-w-sm mb-8">
+                    We need a bit more info to generate your schedule. Please complete your profile to continue.
+                </p>
+
+                <div className="w-full max-w-xs space-y-3 mb-8">
+                    {missingConfig.map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100">
+                            <XCircle className="w-4 h-4 shrink-0" />
+                            Missing {item}
+                        </div>
+                    ))}
+                </div>
+
+                <p className="text-xs text-gray-400">
+                    Visit the <span className="font-bold text-gray-600">Profile Tab</span> to update your settings.
+                </p>
+            </div>
+        );
+    }
+
+    // 6. Final Calculations for Render
+    const items = mealPlan?.items || {};
     const preTaxTotal = Object.entries(items).reduce((acc, [type, slotItems]) => {
         if (skipped.includes(type)) return acc;
         return acc + (slotItems?.reduce((slotAcc, item) => slotAcc + (item?.price || 0), 0) || 0);
     }, 0);
     const taxAmount = preTaxTotal * TAX_RATE;
     const finalTotal = preTaxTotal + taxAmount;
-    const isOverBudget = finalTotal > (mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY) + 0.50;
+    const isOverBudget = finalTotal > (mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY) + 0.50;
 
     const { updateMealPlan, addGuestMeal, removeGuestMeal, swapSpecificMeal, toggleSkip } = actions;
-
-    if (!isLoaded || !isConfigured) {
-        return configContent;
-    }
 
     const handleSwap = (slotId, itemId) => {
         swapSpecificMeal(slotId, itemId);
     };
 
     const handleAddGuest = (slotId) => {
-        // Budget Check
-        const items = mealPlan.items[slotId] || [];
-        if (items.length === 0) return;
+        const itemsInSlot = items[slotId] || [];
+        if (itemsInSlot.length === 0) return;
 
-        const hostItem = items[0];
+        const hostItem = itemsInSlot[0];
         const newTotal = finalTotal + (hostItem.price * (1 + TAX_RATE));
-        const currentLimit = mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY;
+        const currentLimit = mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY;
 
         if (newTotal > currentLimit + 0.50) {
             setBudgetModal({
@@ -550,7 +411,6 @@ export const ScheduleView = () => {
     };
 
     return (
-
         <div className="space-y-4 pb-20">
             {/* Header Section */}
             <div className="flex flex-col gap-3">
@@ -598,16 +458,16 @@ export const ScheduleView = () => {
                     <motion.div
                         className={cn(
                             "hidden md:flex px-4 py-2 rounded-2xl border items-center gap-4 bg-white transition-all shadow-sm",
-                            mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] ? "border-emerald-100" : "border-gray-100"
+                            mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] ? "border-emerald-100" : "border-gray-100"
                         )}
                     >
                         <div className="flex flex-col leading-none">
                             <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Limit</span>
                             <div className="flex items-center gap-1.5">
                                 <span className="text-lg font-bold text-gray-900">
-                                    ${(mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
+                                    ${(mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
                                 </span>
-                                {mealPlan.meta?.authorizedBudgets?.[new Date().toDateString()] && (
+                                {mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] && (
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 )}
                             </div>
@@ -630,7 +490,6 @@ export const ScheduleView = () => {
                         exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                         className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/5 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group max-w-4xl mx-auto w-full"
                     >
-                        {/* Background Decoration */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[80px] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
 
                         <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 relative z-10">
@@ -663,7 +522,6 @@ export const ScheduleView = () => {
                         const slotItems = items[type] || [];
                         const isSkipped = skipped.includes(type);
 
-                        // Time Filter & Lock Logic
                         const now = new Date();
                         now.setSeconds(0, 0);
 
@@ -697,7 +555,6 @@ export const ScheduleView = () => {
 
                         return (
                             <React.Fragment key={type}>
-                                {/* DEDICATED MEAL TIMER */}
                                 {!isSkipped && !isLocked && deliveryInfo?.lockTime && (
                                     <div className="mb-4">
                                         <OrderCountdown
@@ -708,14 +565,10 @@ export const ScheduleView = () => {
                                 )}
 
                                 <div className="space-y-3 relative group/slot">
-                                    {/* Advanced Connector Line */}
                                     {slotItems.length > 1 && (
                                         <div className="absolute left-[20px] top-[80px] bottom-[60px] w-1 z-0 pointer-events-none">
-                                            {/* Glow Background */}
                                             <div className="absolute inset-0 bg-indigo-500/10 blur-sm rounded-full" />
-                                            {/* Main Gradient Line */}
                                             <div className="h-full w-full bg-gradient-to-b from-gray-200 via-indigo-100 to-gray-200 rounded-full relative">
-                                                {/* Pulsing Light on Connector */}
                                                 <motion.div
                                                     animate={{ y: ["0%", "100%", "0%"] }}
                                                     transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
@@ -753,7 +606,7 @@ export const ScheduleView = () => {
                                                     onRemove={() => removeGuestMeal(type, meal.id)}
                                                     onAddGuest={() => handleAddGuest(type)}
                                                     deliveryInfo={deliveryInfo}
-                                                    swapIndex={(mealPlan.meta?.swapCounts?.[meal.id] || 0) % (swapOptionsMap[meal.id] || 1)}
+                                                    swapIndex={(mealPlan?.meta?.swapCounts?.[meal.id] || 0) % (swapOptionsMap[meal.id] || 1)}
                                                     totalSwaps={swapOptionsMap[meal.id] || 1}
                                                     isLocked={isLocked}
                                                     isDelivered={isDelivered}
@@ -770,7 +623,6 @@ export const ScheduleView = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Context Summary */}
             <div className="text-center text-xs text-gray-300 font-medium pb-8">
                 Generating from {validMeals.length} valid options based on your profile.
             </div>

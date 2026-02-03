@@ -18,7 +18,7 @@ function cn(...inputs) { return twMerge(clsx(inputs)); }
 export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
     // Sync logic moved to ProfileView
 
-    const { financials, history, nextOrder, mealPlan, deliverySchedule, addresses, skipped, reviews } = useAppContext();
+    const { financials, history, nextOrder, mealPlan, deliverySchedule, addresses, skipped, reviews, actions } = useAppContext();
     const FINANCIALS = financials; // Mapping to keep existing JSX working seamlessly
 
 
@@ -113,19 +113,22 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
             </div>
 
             {/* ROW 2: Lock-In / Next Meal Status banner */}
-            <div className="max-w-4xl mx-auto w-full">
-                {nextOrder ? (
-                    <OrderCountdown
-                        targetDate={nextOrder.expectedTime}
-                        label={nextOrder.label}
-                        onAdjust={() => onNavigate && onNavigate("schedule")}
-                        theme={nextOrder.type}
-                    />
-                ) : (
-                    // Skeleton Loader to prevent layout shift/flicker
-                    <div className="h-24 w-full bg-gray-100 animate-pulse rounded-2xl mb-8" />
-                )}
-            </div>
+            {!nextOrder?.isHidden && (
+                <div className="max-w-4xl mx-auto w-full">
+                    {nextOrder ? (
+                        <OrderCountdown
+                            targetDate={nextOrder.expectedTime}
+                            label={nextOrder.label}
+                            onAdjust={() => onNavigate && onNavigate("schedule")}
+                            theme={nextOrder.type}
+                            onDismiss={nextOrder.id ? () => actions.dismissLockIn(nextOrder.id, nextOrder.expectedTime) : null}
+                        />
+                    ) : (
+                        // Skeleton Loader to prevent layout shift/flicker
+                        <div className="h-24 w-full bg-gray-100 animate-pulse rounded-2xl mb-8" />
+                    )}
+                </div>
+            )}
 
             {/* ROW 3: Split Columns (Priority Notes & Order Review) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">

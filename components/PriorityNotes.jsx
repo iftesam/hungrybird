@@ -208,84 +208,84 @@ export const PriorityNotes = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="bg-white border border-gray-100 rounded-[2rem] p-6 relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow"
+                            className="bg-white border border-gray-100 rounded-[2rem] p-6 relative overflow-hidden group shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300"
                         >
-                            {/* Status Badge */}
-                            <div className="absolute top-4 right-4 flex items-center gap-2">
-                                {note.status === "pending" && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 text-[10px] font-black rounded-full uppercase tracking-wider">
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        Analyzing
-                                    </div>
-                                )}
-                                {note.status === "approved" && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-full uppercase tracking-wider">
-                                        <CheckCircle2 className="w-3 h-3" />
-                                        Approved
-                                    </div>
-                                )}
-                                {note.status === "declined" && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 text-[10px] font-black rounded-full uppercase tracking-wider">
-                                        <XCircle className="w-3 h-3" />
-                                        Declined
-                                    </div>
-                                )}
+                            {/* Card Header: Actions & Status */}
+                            <div className="flex items-start justify-between mb-4 gap-4">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {note.status === "pending" && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 text-[10px] font-black rounded-full uppercase tracking-wider border border-amber-100/50">
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                            Analyzing
+                                        </div>
+                                    )}
+                                    {note.status === "approved" && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-full uppercase tracking-wider border border-emerald-100/50">
+                                            <CheckCircle2 className="w-3 h-3" />
+                                            Approved
+                                        </div>
+                                    )}
+                                    {note.status === "declined" && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 text-[10px] font-black rounded-full uppercase tracking-wider border border-red-100/50">
+                                            <XCircle className="w-3 h-3" />
+                                            Declined
+                                        </div>
+                                    )}
+
+                                    {note.durationLabel && (
+                                        <span className="flex items-center gap-1 bg-gray-50/80 px-2.5 py-1 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest border border-gray-100">
+                                            <Clock className="w-3 h-3" />
+                                            {note.durationLabel}
+                                        </span>
+                                    )}
+                                </div>
 
                                 <button
                                     onClick={() => actions.removePriorityNote(note.id)}
-                                    className="p-2 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors"
+                                    className="p-2 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-all duration-200"
                                     title="Discard Note"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <p className="text-base font-bold text-gray-900 pr-24 leading-snug">
-                                "{note.text}"
-                            </p>
+                            {/* Card Body: The Note Content */}
+                            <div className="relative">
+                                <p className="text-lg font-bold text-gray-900 leading-[1.4] tracking-tight">
+                                    "{note.text}"
+                                </p>
+                            </div>
 
-                            {/* Rejection Reason */}
-                            {note.status === "declined" && note.rejectionReason && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    className="mt-3 p-3 bg-red-50/50 rounded-xl border border-red-100/50 flex items-start gap-2"
-                                >
-                                    <AlertCircle className="w-3 h-3 text-red-500 shrink-0 mt-0.5" />
-                                    <p className="text-[11px] font-medium text-red-600 leading-normal">
-                                        {note.rejectionReason}
-                                    </p>
-                                </motion.div>
-                            )}
-
-                            {/* Manual Overrides - Only for pending notes */}
-                            {note.status === "pending" && (
-                                <div className="mt-4 flex items-center gap-2">
-                                    <button
-                                        onClick={() => actions.approvePriorityNote(note.id)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-[10px] font-black rounded-full uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-600/10 transition-all hover:scale-105"
+                            {/* Rejection Reason - Professional Alert Style */}
+                            <AnimatePresence>
+                                {note.status === "declined" && note.rejectionReason && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                        animate={{ opacity: 1, height: "auto", marginTop: 12 }}
+                                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                        className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex items-start gap-3"
                                     >
-                                        <CheckCircle2 className="w-3 h-3" />
-                                        Force Approve
-                                    </button>
-                                    <button
-                                        onClick={() => actions.declinePriorityNote(note.id, "Manually declined by user")}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-[10px] font-black rounded-full uppercase tracking-widest hover:bg-gray-200 transition-all"
-                                    >
-                                        <XCircle className="w-3 h-3" />
-                                        Decline
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="mt-4 flex items-center gap-3">
-                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                {note.durationLabel && (
-                                    <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                                        <Clock className="w-3 h-3" />
-                                        {note.durationLabel}
-                                    </span>
+                                        <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-red-700 uppercase tracking-widest leading-none">Feedback</p>
+                                            <p className="text-[11px] font-medium text-red-600/90 leading-relaxed">
+                                                {note.rejectionReason}
+                                            </p>
+                                        </div>
+                                    </motion.div>
                                 )}
+                            </AnimatePresence>
+
+
+
+                            {/* Card Footer: Metadata */}
+                            <div className="mt-5 pt-4 border-t border-gray-50 flex items-center justify-start gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                        Posted {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
@@ -306,7 +306,7 @@ export const PriorityNotes = () => {
                             onChange={(e) => setInputText(e.target.value)}
                         />
                         <div className="flex justify-between items-center mt-6 pt-6 border-t border-zinc-200/50">
-                            <div className="relative">
+                            <div className="relative z-[100]">
                                 <button
                                     onClick={() => setShowDurationMenu(!showDurationMenu)}
                                     className="flex items-center gap-2 text-[10px] font-black text-zinc-500 bg-white border border-zinc-200 px-4 py-2 rounded-full transition-all hover:border-zinc-300"
@@ -315,25 +315,37 @@ export const PriorityNotes = () => {
                                     {DURATIONS.find(d => d.value === duration)?.label.toUpperCase()}
                                     <ChevronDown className="w-3 h-3 opacity-50" />
                                 </button>
-                                {showDurationMenu && (
-                                    <div className="absolute top-full left-0 mt-2 w-32 bg-white border border-zinc-100 shadow-2xl rounded-[1.5rem] overflow-hidden z-10 border-zinc-200">
-                                        {DURATIONS.map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                onClick={() => {
-                                                    setDuration(opt.value);
-                                                    setShowDurationMenu(false);
-                                                }}
-                                                className={cn(
-                                                    "w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors",
-                                                    duration === opt.value ? "bg-black text-white" : "text-zinc-500 hover:bg-zinc-50"
-                                                )}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                                <AnimatePresence>
+                                    {showDurationMenu && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute bottom-full left-0 mb-3 w-40 bg-white border border-zinc-200 shadow-[0_15px_50px_-12px_rgba(0,0,0,0.25)] rounded-[1.5rem] overflow-hidden z-[100]"
+                                        >
+                                            <div className="p-1.5">
+                                                <p className="px-3 py-2 text-[9px] font-black text-zinc-400 uppercase tracking-tighter border-b border-zinc-50 mb-1">Duration</p>
+                                                {DURATIONS.map((opt) => (
+                                                    <button
+                                                        key={opt.value}
+                                                        onClick={() => {
+                                                            setDuration(opt.value);
+                                                            setShowDurationMenu(false);
+                                                        }}
+                                                        className={cn(
+                                                            "w-full text-left px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-xl",
+                                                            duration === opt.value
+                                                                ? "bg-gray-900 text-white shadow-lg shadow-black/10"
+                                                                : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                                                        )}
+                                                    >
+                                                        {opt.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
 
                             <div className="flex items-center gap-4">

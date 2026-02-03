@@ -16,6 +16,43 @@ const CUISINE_MAP = {
 };
 
 /**
+ * Ingredient Guardian
+ * Performs a deep scan of meal data to ensure strict compliance with Ingredient Exclusions.
+ * Matches keywords against name, description, ingredients, and tags.
+ */
+export const isMealSafe = (meal, exclusions = []) => {
+    if (!exclusions || exclusions.length === 0) return true;
+
+    // Normalize exclusions for efficient matching
+    const normalizedExclusions = exclusions.map(e => e.toLowerCase());
+
+    // 1. Explicit Allergen Check
+    const hasExplicitAllergy = meal.allergens?.some(a =>
+        normalizedExclusions.includes(a.toLowerCase())
+    );
+    if (hasExplicitAllergy) return false;
+
+    // 2. Deep Text Scan (Hard Rule)
+    // We combine all searchable text into one blob for a comprehensive keyword search
+    const searchableBlob = [
+        meal.name,
+        meal.description,
+        ...(meal.ingredients || []),
+        ...(meal.tags || []),
+        meal.vendor?.name,
+        meal.cuisine
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    const hasForbiddenKeyword = normalizedExclusions.some(exclusion =>
+        searchableBlob.includes(exclusion)
+    );
+
+    if (hasForbiddenKeyword) return false;
+
+    return true;
+};
+
+/**
  * Smart Swap Engine
  * Selects the best meal options based on user profile, constraints, and variety.
  */
@@ -47,16 +84,13 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
     const usedCuisines = new Set(otherMeals.map(m => m.cuisine));
 
     // Financial Soft Cap calculation
-    // Allow going up to remaining budget for the day + a small buffer ($2) if total day is okay
     const TAX_RATE = 0.08875;
-    const TARGET_DAILY = financials.monthlyBudget / 30; // e.g. 60
+    const TARGET_DAILY = financials.monthlyBudget / 30;
 
     const otherMealsCost = otherMeals.reduce((acc, m) => acc + (m.price || 0), 0);
-    const maxDayBudgetPreTax = TARGET_DAILY / (1 + TAX_RATE); // ~55
+    const maxDayBudgetPreTax = TARGET_DAILY / (1 + TAX_RATE);
     const remainingForSlot = maxDayBudgetPreTax - otherMealsCost;
 
-    // Harder cap for the specific slot to capture "Reasonable" swaps
-    // But we allow a "Quality Overflow" of up to $5 if it fits daily budget
     const absoluteMaxPrice = remainingForSlot + 5.00;
 
     // 2. Candidate Filtering
@@ -64,11 +98,8 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
         // A. Strict Time Check
         if (!meal.meal_time.includes(currentMealType)) return false;
 
-        // B. Strict Allergy Check
-        if (profile.allergies && profile.allergies.length > 0) {
-            const hasAllergy = profile.allergies.some(allergy => meal.allergens.includes(allergy));
-            if (hasAllergy) return false;
-        }
+        // B. Deep Ingredient & Allergy Hard Rule
+        if (!isMealSafe(meal, profile.allergies)) return false;
 
         // C. Strict Dietary Check
         if (profile.diet.includes("Vegan") && !meal.dietary.vegan) return false;
@@ -76,7 +107,7 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
         if (profile.diet.includes("Halal") && !meal.dietary.halal) return false;
         if (profile.diet.includes("Gluten-Free") && !meal.dietary.gluten_free) return false;
 
-        // D. Strict Cuisine Check (User Fix)
+        // D. Strict Cuisine Check
         if (cuisines && cuisines.length > 0) {
             const activeCuisines = cuisines.map(c => CUISINE_MAP[c]);
             const matchesCuisine = activeCuisines.some(c =>
@@ -88,8 +119,7 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
         // E. Current Removal
         if (currentMeal && meal.id === currentMeal.id) return false;
 
-        // F. Hard Price Cap (Sanity check)
-        // Don't show $45 dinner for a $15 lunch slot unless budget is huge
+        // F. Hard Price Cap
         if (meal.price > absoluteMaxPrice) return false;
 
         // G. Required Restaurant (Guest Swap Restriction)
@@ -102,29 +132,26 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
 
     // 3. Scoring System
     const scoredCandidates = candidates.map(meal => {
-        let score = 10; // Base score
+        let score = 10;
 
         // A. Restaurant Preferences
         const isTopTier = meal.tags.includes("Top Tier") || meal.vendor.rating >= 4.8;
         if (restaurantPrefs.includes("top_tier") && isTopTier) score += 5;
 
-        // B. Variety Bonus (Anti-Repetition)
-        // If this cuisine is NOT used by other meals today -> Boost
+        // B. Variety Bonus
         if (!usedCuisines.has(meal.cuisine)) {
-            score += 8; // High value on variety
+            score += 8;
         }
 
-        // C. Price Penalty (Soft Budget adherence)
-        // Ideally we want to stay under `remainingForSlot`
+        // C. Price Penalty
         const priceDiff = meal.price - remainingForSlot;
         if (priceDiff > 0) {
-            // Penalize expensive upgrades heavily if they break budget
             score -= (priceDiff * 2);
         }
 
-        // D. Rating Boost (General Quality)
+        // D. Rating Boost
         if (meal.vendor && meal.vendor.rating) {
-            score += (meal.vendor.rating - 4.0) * 5; // e.g. 4.8 -> +4 points
+            score += (meal.vendor.rating - 4.0) * 5;
         }
 
         return { ...meal, score };
@@ -133,6 +160,5 @@ export const findSmartSwap = (currentMealType, currentSchedule, context) => {
     // 4. Sort and Pick
     scoredCandidates.sort((a, b) => b.score - a.score);
 
-    // Return top 5 to allow for some randomness among the best
     return scoredCandidates.slice(0, 5);
 };
