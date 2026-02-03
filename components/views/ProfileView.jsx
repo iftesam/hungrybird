@@ -415,7 +415,7 @@ export const ProfileView = () => {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-8 pb-24"
+            className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 pb-8"
         >
             {/* Enhanced Header with Gradient */}
             <motion.div variants={itemVariants} className="relative">

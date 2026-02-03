@@ -12,7 +12,7 @@ export const SmartAllowance = () => {
     const setSelectedMeals = actions.updateMealPrefs; // Alias
 
     // Initialize logic
-    const initialDaily = Math.round(financials.monthlyBudget / 30) || 25;
+    const initialDaily = Math.round(financials.monthlyBudget / 30) || 30;
     const [budget, setBudget] = useState(initialDaily);
     const [active, setActive] = useState(false); // For visual state on drag
 
@@ -33,7 +33,7 @@ export const SmartAllowance = () => {
         actions.updateFinancials({ monthlyBudget: budget * 30 });
 
         // Auto-Reset logic if budget drops
-        const newMax = budget >= 30 ? 3 : budget >= 20 ? 2 : 1;
+        const newMax = budget >= 45 ? 3 : budget >= 30 ? 2 : 1;
         if (selectedMeals.length > newMax) {
             setSelectedMeals([]);
         }
@@ -62,7 +62,7 @@ export const SmartAllowance = () => {
     };
 
     // Logic
-    const maxMeals = budget >= 30 ? 3 : budget >= 20 ? 2 : 1;
+    const maxMeals = budget >= 45 ? 3 : budget >= 30 ? 2 : 1;
     const isCapped = selectedMeals.length >= maxMeals;
 
     // Buying Power Logic
@@ -94,8 +94,8 @@ export const SmartAllowance = () => {
     ];
 
     // Math for Slider
-    // Range: 10 to 100
-    const MIN = 10;
+    // Range: 15 to 100
+    const MIN = 15;
     const MAX = 100;
     const percent = ((budget - MIN) / (MAX - MIN)) * 100;
 
@@ -115,8 +115,11 @@ export const SmartAllowance = () => {
                     <p className="text-sm text-gray-500">Adjust your daily budget to unlock more meal slots.</p>
                 </div>
                 <div className="text-right">
-                    <div className="text-3xl font-bold tracking-tight text-gray-900">${budget}</div>
-                    <div className="text-xs text-gray-400 font-medium uppercase tracking-wider">Daily Limit</div>
+                    <div className={cn(
+                        "text-3xl font-bold tracking-tight transition-colors duration-300",
+                        budget >= 45 ? "text-emerald-600" : budget >= 30 ? "text-amber-500" : "text-blue-600"
+                    )}>${budget}</div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Daily Cap</div>
                 </div>
             </div>
 
@@ -215,67 +218,115 @@ export const SmartAllowance = () => {
             </AnimatePresence>
 
             {/* MATERIAL DESIGN SLIDER */}
-            <div className="mb-10 relative h-12 flex items-center select-none">
-                <div className="absolute w-full h-1 bg-gray-200 rounded-full" />
-                <motion.div
-                    className="absolute h-1 bg-black rounded-full"
-                    style={{ width: `${percent}%` }}
-                    initial={false}
-                    animate={{ width: `${percent}%` }}
-                    transition={{ type: "spring", bounce: 0, duration: 0.1 }}
-                />
-                {[20, 30, 50, 75].map(tick => (
+            <div className="mb-10 relative">
+                {/* Labels above slider */}
+                <div className="relative h-4 mb-2">
                     <div
-                        key={tick}
-                        className={cn(
-                            "absolute w-1 h-1 rounded-full transform -translate-x-1/2",
-                            budget >= tick ? "bg-black/50" : "bg-gray-300"
-                        )}
-                        style={{ left: `${((tick - MIN) / (MAX - MIN)) * 100}%` }}
-                    />
-                ))}
-                <motion.div
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20"
-                    style={{ left: `${percent}%` }}
-                    initial={false}
-                    animate={{ left: `${percent}%` }}
-                    transition={{ type: "spring", bounce: 0, duration: 0.1 }}
-                >
-                    <div
-                        className={cn(
-                            "w-5 h-5 bg-white border-2 border-black rounded-full shadow-md transition-transform duration-100 flex items-center justify-center relative",
-                            active ? "scale-125" : "scale-100 hover:scale-110"
-                        )}
+                        className="absolute text-[10px] font-bold text-blue-600 uppercase tracking-tight -translate-x-1/2"
+                        style={{ left: "0%" }}
                     >
-                        <div className="absolute inset-0 rounded-full bg-black/10 opacity-0 active:opacity-100 transition-opacity scale-150" />
+                        Stage 1
                     </div>
-                    <AnimatePresence>
-                        {(active) && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                animate={{ opacity: 1, y: -40, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.8 }}
-                                className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
-                            >
-                                <div className="bg-gray-900 text-white text-xs font-bold px-2 py-1.5 rounded-md shadow-xl whitespace-nowrap">
-                                    ${budget}
-                                </div>
-                                <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-900 -mt-[1px]" />
-                            </motion.div>
+                    <div
+                        className={cn(
+                            "absolute text-[10px] font-bold uppercase tracking-tight -translate-x-1/2 transition-all duration-300",
+                            budget >= 30 ? "text-amber-600 opacity-100" : "text-gray-300 opacity-50"
                         )}
-                    </AnimatePresence>
-                </motion.div>
-                <input
-                    type="range"
-                    min={MIN}
-                    max={MAX}
-                    step="1"
-                    value={budget}
-                    onPointerDown={() => setActive(true)}
-                    onPointerUp={() => setActive(false)}
-                    onChange={(e) => setBudget(parseInt(e.target.value))}
-                    className="absolute w-full h-full opacity-0 cursor-pointer z-30"
-                />
+                        style={{ left: `${((30 - MIN) / (MAX - MIN)) * 100}%` }}
+                    >
+                        Stage 2
+                    </div>
+                    <div
+                        className={cn(
+                            "absolute text-[10px] font-bold uppercase tracking-tight -translate-x-1/2 transition-all duration-300",
+                            budget >= 45 ? "text-emerald-600 opacity-100" : "text-gray-300 opacity-50"
+                        )}
+                        style={{ left: `${((45 - MIN) / (MAX - MIN)) * 100}%` }}
+                    >
+                        Stage 3
+                    </div>
+                </div>
+
+                <div className="relative h-12 flex items-center select-none">
+                    <div className="absolute w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                            className={cn(
+                                "absolute h-full transition-colors duration-500",
+                                budget >= 45 ? "bg-emerald-500" : budget >= 30 ? "bg-amber-400" : "bg-blue-500"
+                            )}
+                            style={{ width: `${percent}%` }}
+                            initial={false}
+                            animate={{ width: `${percent}%` }}
+                            transition={{ type: "spring", bounce: 0, duration: 0.1 }}
+                        />
+                    </div>
+
+                    {[30, 45].map(tick => (
+                        <div
+                            key={tick}
+                            className={cn(
+                                "absolute w-2 h-2 rounded-full transform -translate-x-1/2 z-10 transition-colors border-2",
+                                budget >= tick ? "bg-white border-transparent" : "bg-white border-gray-200"
+                            )}
+                            style={{ left: `${((tick - MIN) / (MAX - MIN)) * 100}%` }}
+                        />
+                    ))}
+
+                    <motion.div
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20"
+                        style={{ left: `${percent}%` }}
+                        initial={false}
+                        animate={{ left: `${percent}%` }}
+                        transition={{ type: "spring", bounce: 0, duration: 0.1 }}
+                    >
+                        <div
+                            className={cn(
+                                "w-6 h-6 bg-white border-4 rounded-full shadow-lg transition-all duration-300 relative flex items-center justify-center",
+                                budget >= 45 ? "border-emerald-500" : budget >= 30 ? "border-amber-400" : "border-blue-500",
+                                active ? "scale-125 shadow-xl" : "scale-100 hover:scale-110"
+                            )}
+                        >
+                            {active && (
+                                <div className={cn(
+                                    "absolute inset-0 rounded-full animate-ping opacity-25",
+                                    budget >= 45 ? "bg-emerald-500" : budget >= 30 ? "bg-amber-400" : "bg-blue-500"
+                                )} />
+                            )}
+                        </div>
+                        <AnimatePresence>
+                            {(active) && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: -45, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.8 }}
+                                    className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
+                                >
+                                    <div className={cn(
+                                        "text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-2xl whitespace-nowrap transition-colors",
+                                        budget >= 45 ? "bg-emerald-600" : budget >= 30 ? "bg-amber-500" : "bg-blue-600"
+                                    )}>
+                                        ${budget}
+                                    </div>
+                                    <div className={cn(
+                                        "w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] -mt-[1px]",
+                                        budget >= 45 ? "border-t-emerald-600" : budget >= 30 ? "border-t-amber-500" : "border-t-blue-600"
+                                    )} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                    <input
+                        type="range"
+                        min={MIN}
+                        max={MAX}
+                        step="1"
+                        value={budget}
+                        onPointerDown={() => setActive(true)}
+                        onPointerUp={() => setActive(false)}
+                        onChange={(e) => setBudget(parseInt(e.target.value))}
+                        className="absolute w-full h-full opacity-0 cursor-pointer z-30"
+                    />
+                </div>
             </div>
 
             <div className="flex justify-between text-[10px] font-bold text-gray-400 -mt-6 mb-6 px-0.5 uppercase tracking-wider">
@@ -284,17 +335,28 @@ export const SmartAllowance = () => {
             </div>
 
             {/* Smart Helper Text */}
-            <div className="mb-6 bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3">
-                <div className="mt-0.5 text-blue-500">
-                    <Sun className="w-4 h-4" />
+            <div className={cn(
+                "mb-6 p-4 rounded-2xl border transition-all duration-500 flex items-start gap-4",
+                budget >= 45 ? "bg-emerald-50 border-emerald-100" : budget >= 30 ? "bg-amber-50 border-amber-100" : "bg-blue-50 border-blue-100"
+            )}>
+                <div className={cn(
+                    "mt-0.5 p-2 rounded-lg transition-colors",
+                    budget >= 45 ? "bg-emerald-100 text-emerald-600" : budget >= 30 ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
+                )}>
+                    {budget >= 45 ? <CheckCircle2 className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </div>
-                <div className="text-xs text-gray-600 leading-relaxed">
-                    <span className="font-bold text-gray-900 block mb-0.5">
-                        {budget < 20 ? "1 Meal Unlocked" : budget < 30 ? "2 Meals Unlocked" : "All 3 Meals Unlocked"}
+                <div className="text-xs leading-relaxed">
+                    <span className={cn(
+                        "font-bold block mb-1 text-sm",
+                        budget >= 45 ? "text-emerald-900" : budget >= 30 ? "text-amber-900" : "text-blue-900"
+                    )}>
+                        {budget < 30 ? "Discovery Mode" : budget < 45 ? "Comfort Mode" : "Freedom Mode"}
                     </span>
-                    {budget < 20 && "Unlocks 1 premium meal. Increase to $20 for 2 slots."}
-                    {budget >= 20 && budget < 30 && "Unlocks 2 smart meal slots."}
-                    {budget >= 30 && "Unlocks full 3-meal plan flexibility."}
+                    <p className="text-gray-600 font-medium">
+                        {budget < 30 && "Enjoy 1 meal daily with smart logistics."}
+                        {budget >= 30 && budget < 45 && "Unlocked 2 meal slots. Balanced fulfillment active."}
+                        {budget >= 45 && "All 3 meal slots unlocked. Maximum variety and luxury."}
+                    </p>
                 </div>
             </div>
 
@@ -416,13 +478,15 @@ export const SmartAllowance = () => {
                 </div>
 
                 <div className="text-right">
-                    {isCapped && budget < 30 ? (
-                        <div className="text-xs text-orange-600 font-medium">
-                            Increase budget to $30<br />to unlock 3rd meal.
+                    {isCapped && budget < 45 ? (
+                        <div className="text-[11px] text-amber-600 font-bold leading-tight">
+                            Unlock {budget < 30 ? "2nd" : "3rd"} Meal<br />
+                            <span className="font-normal opacity-70">Add ${budget < 30 ? 30 - budget : 45 - budget} to daily limit</span>
                         </div>
                     ) : (
-                        <div className="text-xs text-emerald-600 font-medium">
-                            Daily Budget Active
+                        <div className="text-xs text-emerald-600 font-bold flex items-center gap-1 justify-end">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Plan Active
                         </div>
                     )}
                 </div>

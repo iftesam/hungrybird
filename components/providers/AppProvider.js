@@ -29,7 +29,7 @@ const INITIAL_FINANCIALS = {
     spent: 840.00 // Approx 14 days * 60
 };
 
-const INITIAL_CUISINES = ["us", "mx", "jp", "in", "kr", "pk", "bd"]; // American, Mexican, Japanese, Indian, Korean, Pakistani, Bangladeshi
+const INITIAL_CUISINES = ["us", "mx", "cn", "jp", "sh", "md", "kr", "in"]; // American, Mexican, Chinese, Japanese, Steakhouse, Mediterranean, Korean, Indian
 
 const INITIAL_ADDRESSES = [
     {
@@ -62,7 +62,7 @@ const INITIAL_ADDRESSES = [
 ];
 
 const INITIAL_MEAL_PREFS = ["breakfast", "lunch", "dinner"]; // All 3 meals selected
-const INITIAL_RESTAURANT_PREFS = ["top_tier", "cohort", "fresh", "gems"]; // 4 selected, excluding The Rouxlette (wildcard)
+const INITIAL_RESTAURANT_PREFS = ["top_tier", "cohort", "fresh"]; // Default: Top Tier, Cohort, and Fresh
 
 import { MEALS, CUISINE_MAP } from "@/data/meals";
 import { findSmartSwap } from "@/utils/SwapLogistics";

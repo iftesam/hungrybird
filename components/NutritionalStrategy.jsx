@@ -61,7 +61,7 @@ export const NutritionalStrategy = ({ onAccessDenied }) => {
 
             <div className="mb-6 relative z-10">
                 <h3 className="text-lg font-bold text-gray-900">Nutritional Strategy</h3>
-                <p className="text-sm text-gray-500">Tell RouxBot your primary biological objective.</p>
+                <p className="text-sm text-gray-500">Tell our system your primary biological objective.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -52,7 +52,6 @@ export const PriorityNotes = () => {
                     </div>
                     <div>
                         <h3 className="text-lg font-bold tracking-tight">Priority Notes</h3>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Override Control</p>
                     </div>
                     <div
                         className="relative z-50 ml-1"

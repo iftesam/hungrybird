@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GlassWater, Check, Sparkles, Snowflake, Ban } from "lucide-react";
+import { GlassWater, Check, Sparkles, Snowflake, Ban, Info } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useAppContext } from "@/components/providers/AppProvider";
@@ -17,6 +17,20 @@ const DRINK_OPTIONS = [
     { id: "drpepper", label: "Dr Pepper", color: "#541016", highlight: "#802029", flavor: "Spiced", icon: "🌶️" },
     { id: "fanta", label: "Fanta", color: "#FF7300", highlight: "#FFA500", flavor: "Orange", icon: "🍊" }
 ];
+
+const getRankLabel = (index) => {
+    if (index === 0) return "1st";
+    if (index === 1) return "2nd";
+    if (index === 2) return "3rd";
+    return `${index + 1}th`;
+};
+
+const getRankTitle = (index) => {
+    if (index === 0) return "Primary";
+    if (index === 1) return "Secondary";
+    if (index === 2) return "Tertiary";
+    return `Preference ${index + 1}`;
+};
 
 export const DrinkPreference = () => {
     const { profile, actions } = useAppContext();
@@ -53,9 +67,10 @@ export const DrinkPreference = () => {
                         <Sparkles className="w-4 h-4 text-emerald-500 fill-emerald-500" />
                         <h3 className="text-lg font-bold text-gray-900 tracking-tight">Drink Preferences</h3>
                     </div>
-                    <p className="text-sm font-medium text-gray-400">
-                        Curate your hydration pack (3-5 items).
-                    </p>
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-400">
+                        <span className="text-gray-500 font-bold">Selection order matters.</span>
+                        <span>Curate your hydration pack (3-5 items).</span>
+                    </div>
                 </div>
 
                 <motion.div
@@ -71,9 +86,20 @@ export const DrinkPreference = () => {
                 </motion.div>
             </div>
 
+            {/* Google-stye Info Banner */}
+            <div className="mb-6 flex gap-3 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50 relative z-10">
+                <div className="bg-white p-1 rounded-lg shadow-sm">
+                    <Info className="w-4 h-4 text-blue-500" />
+                </div>
+                <p className="text-xs text-blue-700 font-medium leading-relaxed">
+                    <span className="font-bold">Order matters!</span> We fulfill your drinks in the exact order you select them. Rank your favorites by tapping them in sequence.
+                </p>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
                 {DRINK_OPTIONS.map((drink) => {
-                    const isSelected = selectedDrinks.includes(drink.id);
+                    const index = selectedDrinks.indexOf(drink.id);
+                    const isSelected = index !== -1;
 
                     return (
                         <motion.button
@@ -82,7 +108,7 @@ export const DrinkPreference = () => {
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.95 }}
                             className={cn(
-                                "relative group flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-300 h-40 overflow-hidden",
+                                "relative group flex flex-col items-center justify-between p-4 rounded-xl border transition-all duration-300 h-44 overflow-hidden",
                                 isSelected
                                     ? "bg-white ring-2 ring-black ring-offset-2 border-transparent shadow-xl shadow-black/5"
                                     : "bg-gray-50/50 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-md"
@@ -94,26 +120,36 @@ export const DrinkPreference = () => {
                                 animate={{ backgroundColor: isSelected ? drink.color : "transparent" }}
                             />
 
-                            {/* Badge */}
-                            <div className="w-full flex justify-end mb-2">
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        opacity: isSelected ? 1 : 0,
-                                        scale: isSelected ? 1 : 0.5
-                                    }}
-                                    className="w-5 h-5 bg-black text-white rounded-full flex items-center justify-center shadow-lg"
-                                >
-                                    <Check className="w-3 h-3 stroke-[3]" />
-                                </motion.div>
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        opacity: !isSelected ? 1 : 0,
-                                        scale: !isSelected ? 1 : 0.5
-                                    }}
-                                    className="w-5 h-5 rounded-full border-2 border-gray-200"
-                                />
+                            {/* Priority Badge */}
+                            <div className="w-full flex justify-between items-center mb-2">
+                                <AnimatePresence>
+                                    {isSelected && (
+                                        <motion.div
+                                            initial={{ scale: 0.5, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            exit={{ scale: 0.5, opacity: 0 }}
+                                            className="px-2 py-0.5 bg-black text-white rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg"
+                                        >
+                                            {getRankLabel(index)}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className="ml-auto">
+                                    <motion.div
+                                        initial={false}
+                                        animate={{
+                                            opacity: isSelected ? 1 : 0,
+                                            scale: isSelected ? 1 : 0.5
+                                        }}
+                                        className="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg"
+                                    >
+                                        <Check className="w-3 h-3 stroke-[3]" />
+                                    </motion.div>
+                                    {!isSelected && (
+                                        <div className="w-5 h-5 rounded-full border-2 border-gray-200" />
+                                    )}
+                                </div>
                             </div>
 
                             {/* THE GLASS - High Fidelity */}
@@ -269,7 +305,29 @@ export const DrinkPreference = () => {
                                     "block text-sm font-bold transition-all",
                                     isSelected ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600"
                                 )}>{drink.label}</span>
-                                <span className="text-[10px] uppercase font-bold tracking-wider text-gray-300">{drink.flavor}</span>
+                                <AnimatePresence mode="wait">
+                                    {isSelected ? (
+                                        <motion.span
+                                            key="rank"
+                                            initial={{ opacity: 0, y: 5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -5 }}
+                                            className="text-[10px] uppercase font-black tracking-widest text-[#FA651E]"
+                                        >
+                                            {getRankTitle(index)}
+                                        </motion.span>
+                                    ) : (
+                                        <motion.span
+                                            key="flavor"
+                                            initial={{ opacity: 0, y: 5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -5 }}
+                                            className="text-[10px] uppercase font-bold tracking-wider text-gray-300"
+                                        >
+                                            {drink.flavor}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
                             </div>
 
                         </motion.button>

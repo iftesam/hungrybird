@@ -91,7 +91,7 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
     };
 
     return (
-        <div className="space-y-8 md:space-y-12 pb-24 md:pb-20">
+        <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 md:space-y-12 pb-8">
             {/* ROW 1: Header & Personalized Greeting */}
             <div className="flex flex-col gap-1">
                 <motion.div
@@ -156,7 +156,6 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold tracking-tight">Order Review</h3>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Taste Calibration</p>
                             </div>
 
                             {/* Google Material Design Tooltip */}

@@ -63,7 +63,7 @@ export const HealthConnectModal = ({ isOpen, onClose, onSyncComplete }) => {
                                 </div>
                             </div>
                             <p className="text-[15px] leading-snug text-gray-500">
-                                "HungryBird" would like to access and update your Health data to optimize nutrition recommendations.
+                                "<span className="text-[#FA651E] font-bold">HungryBird</span>" would like to access and update your Health data to optimize nutrition recommendations.
                             </p>
                         </div>
 
@@ -95,7 +95,7 @@ export const HealthConnectModal = ({ isOpen, onClose, onSyncComplete }) => {
                             </div>
 
                             <p className="mx-6 mt-3 text-xs text-gray-400">
-                                HungryBird uses this data to calculate your Recovery Score and TDEE.
+                                <span className="text-[#FA651E] font-semibold">HungryBird</span> uses this data to calculate your Recovery Score and TDEE.
                             </p>
                         </div>
 

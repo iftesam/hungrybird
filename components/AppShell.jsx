@@ -17,6 +17,7 @@ import { twMerge } from "tailwind-merge";
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { WhyHungryBirdModal } from "./WhyHungryBirdModal";
 
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
@@ -209,7 +210,7 @@ export const AppLayout = ({ children }) => {
                                 damping: 30,
                                 duration: 0.2
                             }}
-                            className="w-full max-w-6xl mx-auto p-4 md:p-8 pb-32"
+                            className="w-full"
                         >
                             {children}
                         </motion.div>
@@ -267,6 +268,8 @@ export const AppLayout = ({ children }) => {
                     })}
                 </div>
             </motion.div>
+            {/* Why HungryBird Modal */}
+            <WhyHungryBirdModal />
         </div>
     );
 };
