@@ -297,7 +297,6 @@ export const DashboardView = ({ isSynced, onSync, onNavigate }) => {
                         </div>
                         <div>
                             <h2 className="text-2xl font-black tracking-tight">Logistics</h2>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Live Telemetry</p>
                         </div>
                     </div>
                     <div className="px-6 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
