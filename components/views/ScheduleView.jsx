@@ -498,13 +498,9 @@ export const ScheduleView = () => {
 
                         <div className="flex-1 text-center md:text-left relative z-10">
                             <h3 className="font-black text-xl text-emerald-900 tracking-tight">All Orders Locked & Processed</h3>
-                            <p className="text-sm font-medium text-emerald-700/70">Your schedule is secured. We're preparing your delicious meals for delivery.</p>
                         </div>
 
-                        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/50 rounded-full border border-emerald-100 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
-                            <Sparkles className="w-3 h-3" />
-                            Ready for Departure
-                        </div>
+
                     </motion.div>
                 )}
             </AnimatePresence>
