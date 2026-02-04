@@ -13,7 +13,7 @@ const MODES = {
         badge: "High Density Cluster",
         color: "emerald",
         icon: Users,
-        description: "10+ orders within 500 meters. One driver loop.",
+        description: "10+ orders within 500 meters.",
         logistics: "Proximity Batching (500 meters)",
         pricing: "FREE Delivery",
         driverAction: "Hourly Wage: $25",
@@ -37,7 +37,7 @@ const MODES = {
         badge: "Medium Density",
         color: "amber",
         icon: Truck,
-        description: "Small batches (4-9 orders). Multi-stop routing.",
+        description: "Small batches (4-9 orders).",
         logistics: "Multi-Stop Batch",
         pricing: "$1.99 Fee",
         driverAction: "Hourly Wage: $25",
@@ -63,7 +63,7 @@ const MODES = {
         icon: Zap,
         description: "Direct point-to-point. We charge the true cost of logistics.",
         logistics: "Dedicated Courier",
-        pricing: "$7.99 Premium",
+        pricing: "$7.99 Fee",
         driverAction: "Single Order Dispatch",
 
         // THE MATH: Why we survive and they bleed
@@ -492,7 +492,7 @@ export const LogisticsEngineView = () => {
                                 <ShieldCheck className="w-8 h-8 text-rose-500 mb-1" />
                                 <p className="text-lg text-white font-bold max-w-md mx-auto leading-tight">
                                     100% At-Cost Delivery.<br />
-                                    <span className="text-sm font-medium text-rose-200 opacity-90">You pay exactly what it costs to get it to you.</span>
+                                    <span className="text-sm font-medium text-rose-200 opacity-90">You charge exactly what it costs to get it to you.</span>
                                 </p>
                             </div>
                         ) : (
