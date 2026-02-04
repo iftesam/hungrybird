@@ -298,7 +298,7 @@ export default function WhyHungryBird() {
                     title="The 'Cold Fries' Paradox"
                     reality="Traditional drivers zig-zag across the city to maximize their earnings, not your food quality. Your meal sits in the back seat for 40 minutes while they drop off a taco 3 miles away."
                     impact="Soggy fries. Lukewarm soup. The convenience of delivery destroys the joy of the meal."
-                    solution="The 500m Cluster. One pickup. One drop-off location (yours). No detours. No zig-zags. The food arrives the way the chef intended."
+                    solution="The 500 meters Cluster. One pickup. One drop-off location (yours). No detours. No zig-zags. The food arrives the way the chef intended."
                     doodleSrc="/doodles/food_quality.png"
                     color={{ bg: "bg-[#f97316]", card: "bg-orange-50/50 border-orange-100", text: "text-orange-900" }}
                     icon={Thermometer}

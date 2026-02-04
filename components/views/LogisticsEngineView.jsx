@@ -376,8 +376,8 @@ export const LogisticsEngineView = () => {
                                 {/* --- YELLOW MODE VISUALS (FIXED: Multi-Stop) --- */}
                                 {activeMode === 'yellow' && (
                                     <>
-                                        {/* The 500m Radius (Yellow Mode) */}
-                                        {/* The 500m Radius (Yellow Mode) */}
+                                        {/* The 500 meters Radius (Yellow Mode) */}
+                                        {/* The 500 meters Radius (Yellow Mode) */}
                                         <div className="absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 rounded-full border border-amber-500/30 bg-amber-500/5 flex items-center justify-center z-10">
                                             {/* Label */}
                                             <div className="absolute -top-3 z-20">
