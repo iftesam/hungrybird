@@ -48,7 +48,7 @@ export const AppLayout = ({ children }) => {
 
     const NAV_ITEMS = [
         { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
-        { id: "logistics", label: "Logistics", icon: Truck, path: "/LogisticsView" },
+        { id: "logistics", label: "Logistics", icon: Truck, path: "/Logistics" },
         { id: "schedule", label: "Schedule", icon: Calendar, path: "/Schedule" },
         { id: "taste-profile", label: "Taste Profile", icon: Heart, path: "/TasteProfile" },
         { id: "history", label: "Order History", icon: Clock, path: "/OrderHistory" },
