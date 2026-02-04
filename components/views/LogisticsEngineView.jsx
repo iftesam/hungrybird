@@ -13,17 +13,17 @@ const MODES = {
         badge: "High Density Cluster",
         color: "emerald",
         icon: Users,
-        description: "15 orders within 500m. One driver loop.",
-        logistics: "Proximity Batching (500m)",
-        pricing: "$0.99 Delivery",
+        description: "10+ orders within 500 meters. One driver loop.",
+        logistics: "Proximity Batching (500 meters)",
+        pricing: "FREE Delivery",
         driverAction: "Hourly Wage: $25",
         math: {
-            revenue: 5.49, // Commission ($4.50) + Fee ($0.99)
+            revenue: 4.50, // Commission ($4.50) + Fee ($0.00)
             foodCost: 10.50,
             driverCost: 1.67, // $25.00 / 15 orders
-            profit: 3.82,     // $5.49 - $1.67
-            customerFee: 0.99,
-            batchProfit: 57.30 // 15 * 3.82
+            profit: 2.83,     // $4.50 - $1.67
+            customerFee: 0.00,
+            batchProfit: 42.45 // 15 * 2.83
         },
         comparison: {
             competitorCost: 90.00, // 15 orders * $6.00 mkt avg
@@ -37,17 +37,17 @@ const MODES = {
         badge: "Medium Density",
         color: "amber",
         icon: Truck,
-        description: "Small batches (5 orders). Multi-stop routing.",
+        description: "Small batches (4-9 orders). Multi-stop routing.",
         logistics: "Multi-Stop Batch",
-        pricing: "$2.99 Fee",
+        pricing: "$1.99 Fee",
         driverAction: "Hourly Wage: $25",
         math: {
-            revenue: 7.49, // Commission ($4.50) + Fee ($2.99)
+            revenue: 6.49, // Commission ($4.50) + Fee ($1.99)
             foodCost: 10.50,
             driverCost: 5.00, // $25.00 / 5 orders
-            profit: 2.49,     // $7.49 - $5.00
-            customerFee: 2.99,
-            batchProfit: 12.45 // 5 * 2.49
+            profit: 1.49,     // $6.49 - $5.00
+            customerFee: 1.99,
+            batchProfit: 7.45 // 5 * 1.49
         },
         comparison: {
             competitorCost: 30.00, // 5 orders * $6.00
@@ -61,22 +61,35 @@ const MODES = {
         badge: "Low Density",
         color: "rose",
         icon: Zap,
-        description: "Direct point-to-point. Traditional Model.",
-        logistics: "Direct Courier",
-        pricing: "$5.99 Standard",
-        driverAction: "Gig Network",
+        description: "Direct point-to-point. We charge the true cost of logistics.",
+        logistics: "Dedicated Courier",
+        pricing: "$7.99 Premium",
+        driverAction: "Single Order Dispatch",
+
+        // THE MATH: Why we survive and they bleed
         math: {
-            revenue: 10.49, // Commission ($4.50) + Fee ($5.99)
-            foodCost: 10.50,
-            driverCost: 10.49, // 1 Driver @ $10.49 (Breakeven)
-            profit: 0.00,      // $10.49 - $10.49
-            customerFee: 5.99,
-            batchProfit: 0.00  // 1 order * 0.00
+            revenue: 22.99, // $15 Food + $7.99 Fee
+            foodCost: 10.50, // Restaurant takes 70%
+            driverCost: 12.50, // Real cost of 30-min solo delivery
+            profit: 0.00,     // BREAKEVEN. (We don't lose money).
+            customerFee: 7.99,
+            batchProfit: 0.00
         },
+
+        // THE COMPARISON GRAPH
         comparison: {
-            competitorCost: 12.00, // Market Avg for freelance courier
-            ourCost: 10.49,        // Our Cost
-            savings: 1.51          // $12.00 - $10.49
+            competitorLabel: "DoorDash (Standard Fee)",
+            // They charge $2.99 fee + $4.50 comm = $7.49 Rev. 
+            // Cost is $12.50. They lose $5.01.
+            competitorProfit: -5.01,
+
+            ourLabel: "HungryBird (True Cost Fee)",
+            // We charge $7.99 fee + $4.50 comm = $12.49 Rev.
+            // Cost is $12.50. We break even.
+            ourProfit: 0.00,
+
+            // The story text for the graph
+            story: "Competitors lose $5/order here. We break even."
         }
     }
 };
@@ -124,7 +137,7 @@ export const LogisticsEngineView = () => {
                         </h1>
                         <p className="text-xl text-gray-500 leading-relaxed">
                             By locking orders <span className="text-gray-900 font-bold">60 minutes early</span>, we eliminate randomness.
-                            Everyone within 500m ordering from the <span className="text-gray-900 font-bold">same/nearby restaurant</span> is batched together.
+                            Everyone within 500 meters ordering from the <span className="text-gray-900 font-bold">same/nearby restaurant</span> is batched together.
                         </p>
                     </div>
 
@@ -139,14 +152,14 @@ export const LogisticsEngineView = () => {
                         </div>
                         <div className="mt-2 text-xs text-emerald-600 font-bold flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" />
-                            {activeMode === 'green' ? '800% vs Industry' : activeMode === 'yellow' ? 'High Margin' : 'Standard Rate'}
+                            {activeMode === 'green' ? 'High Margin' : activeMode === 'yellow' ? 'Good Margin' : 'Breakeven'}
                         </div>
                     </div>
                 </motion.div>
             </div>
 
             {/* --- THE SIMULATOR --- */}
-            <div className="grid lg:grid-cols-12 gap-6 items-stretch h-auto lg:h-[700px]">
+            <div className="grid lg:grid-cols-12 gap-6 items-stretch h-auto lg:min-h-[700px]">
 
                 {/* LEFT: CONTROLS */}
                 {/* LEFT: CONTROLS - RE-DESIGNED STATE OF THE ART */}
@@ -275,7 +288,7 @@ export const LogisticsEngineView = () => {
                                         <div>
                                             <h4 className="text-sm font-bold text-rose-900 mb-1">Industry Reality</h4>
                                             <p className="text-xs text-rose-800 leading-relaxed font-medium">
-                                                "Yes! Traditional food delivery apps <span className="font-black underline decoration-rose-400/50">lose money</span> when the order amount is small."
+                                                Traditional food delivery apps <span className="font-black underline decoration-rose-400/50">lose money</span> when the order amount is small.
                                             </p>
                                         </div>
                                     </div>
@@ -319,7 +332,7 @@ export const LogisticsEngineView = () => {
                                             {/* Label */}
                                             <div className="absolute -top-3 z-20">
                                                 <div className="text-[10px] text-emerald-400 font-bold bg-gray-900 border border-emerald-500/30 px-2 py-1 rounded-full shadow-lg">
-                                                    500m High Density
+                                                    500 meters High Density
                                                 </div>
                                             </div>
 
@@ -327,7 +340,7 @@ export const LogisticsEngineView = () => {
                                             <div className="absolute inset-0 rounded-full animate-pulse bg-emerald-400/5"></div>
 
                                             {/* Scattered Orders (Deterministic Chaos) */}
-                                            {[...Array(18)].map((_, i) => {
+                                            {[...Array(15)].map((_, i) => {
                                                 // Create a deterministic "scatter" using polar coordinates
                                                 // Golden angle approx for even distribution without grid look
                                                 const angle = i * 2.399;
@@ -363,44 +376,60 @@ export const LogisticsEngineView = () => {
                                 {/* --- YELLOW MODE VISUALS (FIXED: Multi-Stop) --- */}
                                 {activeMode === 'yellow' && (
                                     <>
-                                        {/* Stop 1 */}
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="absolute right-[40%] top-[35%] z-20">
-                                            <div className="w-4 h-4 bg-amber-400 border-2 border-amber-600 rounded-full shadow-[0_0_15px_#d97706]"></div>
-                                            <div className="text-[8px] text-amber-400 absolute top-5 -left-2">Stop 1</div>
-                                        </motion.div>
-                                        {/* Stop 2 */}
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} className="absolute right-[20%] top-[55%] z-20">
-                                            <div className="w-4 h-4 bg-amber-400 border-2 border-amber-600 rounded-full shadow-[0_0_15px_#d97706]"></div>
-                                            <div className="text-[8px] text-amber-400 absolute top-5 -left-2">Stop 2</div>
-                                        </motion.div>
-                                        {/* Stop 3 */}
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.8 }} className="absolute right-[30%] bottom-[25%] z-20">
-                                            <div className="w-4 h-4 bg-amber-400 border-2 border-amber-600 rounded-full shadow-[0_0_15px_#d97706]"></div>
-                                            <div className="text-[8px] text-amber-400 absolute top-5 -left-2">Stop 3</div>
-                                        </motion.div>
-                                        {/* Stop 4 */}
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.1 }} className="absolute right-[45%] bottom-[20%] z-20">
-                                            <div className="w-4 h-4 bg-amber-400 border-2 border-amber-600 rounded-full shadow-[0_0_15px_#d97706]"></div>
-                                            <div className="text-[8px] text-amber-400 absolute top-5 -left-2">Stop 4</div>
-                                        </motion.div>
-                                        {/* Stop 5 */}
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.4 }} className="absolute right-[55%] top-[60%] z-20">
-                                            <div className="w-4 h-4 bg-amber-400 border-2 border-amber-600 rounded-full shadow-[0_0_15px_#d97706]"></div>
-                                            <div className="text-[8px] text-amber-400 absolute top-5 -left-2">Stop 5</div>
-                                        </motion.div>
+                                        {/* The 500m Radius (Yellow Mode) */}
+                                        {/* The 500m Radius (Yellow Mode) */}
+                                        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 rounded-full border border-amber-500/30 bg-amber-500/5 flex items-center justify-center z-10">
+                                            {/* Label */}
+                                            <div className="absolute -top-3 z-20">
+                                                <div className="text-[10px] text-amber-400 font-bold bg-gray-900 border border-amber-500/30 px-2 py-1 rounded-full shadow-lg">
+                                                    500 meters Medium Density
+                                                </div>
+                                            </div>
+                                            {/* Pulse Ring */}
+                                            <div className="absolute inset-0 rounded-full animate-pulse bg-amber-400/5"></div>
 
-                                        {/* Connecting Paths (Daisy Chain) */}
-                                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-                                            {/* Hub to Stop 1 */}
-                                            <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.1 }} d="M 15% 50% Q 30% 40% 58% 37%" stroke={themeColor.stroke} strokeWidth="3" strokeDasharray="5,5" fill="none" strokeLinecap="round" />
-                                            {/* Stop 1 to Stop 2 */}
-                                            <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.4 }} d="M 58% 37% Q 70% 45% 78% 57%" stroke={themeColor.stroke} strokeWidth="3" strokeDasharray="5,5" fill="none" strokeLinecap="round" />
-                                            {/* Stop 2 to Stop 3 */}
-                                            <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.7 }} d="M 78% 57% Q 75% 70% 68% 73%" stroke={themeColor.stroke} strokeWidth="3" strokeDasharray="5,5" fill="none" strokeLinecap="round" />
-                                            {/* Stop 3 to Stop 4 */}
-                                            <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 1.0 }} d="M 68% 73% Q 60% 80% 55% 78%" stroke={themeColor.stroke} strokeWidth="3" strokeDasharray="5,5" fill="none" strokeLinecap="round" />
-                                            {/* Stop 4 to Stop 5 */}
-                                            <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 1.3 }} d="M 55% 78% Q 50% 70% 45% 62%" stroke={themeColor.stroke} strokeWidth="3" strokeDasharray="5,5" fill="none" strokeLinecap="round" />
+                                            {/* Stops Inside the Radius (Relative Positioning) */}
+                                            {/* Stop 1 */}
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="absolute left-[20%] top-[30%] z-20">
+                                                <div className="w-3 h-3 bg-amber-400 border border-amber-600 rounded-full shadow-[0_0_10px_#d97706]"></div>
+                                                <div className="text-[7px] text-amber-400 absolute top-4 -left-1">1</div>
+                                            </motion.div>
+                                            {/* Stop 2 */}
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} className="absolute left-[60%] top-[25%] z-20">
+                                                <div className="w-3 h-3 bg-amber-400 border border-amber-600 rounded-full shadow-[0_0_10px_#d97706]"></div>
+                                                <div className="text-[7px] text-amber-400 absolute top-4 -left-1">2</div>
+                                            </motion.div>
+                                            {/* Stop 3 (Center-ish) */}
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.8 }} className="absolute left-[45%] top-[55%] z-20">
+                                                <div className="w-3 h-3 bg-amber-400 border border-amber-600 rounded-full shadow-[0_0_10px_#d97706]"></div>
+                                                <div className="text-[7px] text-amber-400 absolute top-4 -left-1">3</div>
+                                            </motion.div>
+                                            {/* Stop 4 */}
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.1 }} className="absolute left-[70%] top-[65%] z-20">
+                                                <div className="w-3 h-3 bg-amber-400 border border-amber-600 rounded-full shadow-[0_0_10px_#d97706]"></div>
+                                                <div className="text-[7px] text-amber-400 absolute top-4 -left-1">4</div>
+                                            </motion.div>
+                                            {/* Stop 5 */}
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.4 }} className="absolute left-[30%] top-[75%] z-20">
+                                                <div className="w-3 h-3 bg-amber-400 border border-amber-600 rounded-full shadow-[0_0_10px_#d97706]"></div>
+                                                <div className="text-[7px] text-amber-400 absolute top-4 -left-1">5</div>
+                                            </motion.div>
+
+                                            {/* Internal Daisy Chain Paths Removed per user request */}
+                                        </div>
+
+                                        {/* Main Connection Path (Hub -> Circle Edge) - SOLID HIGH VISIBILITY */}
+                                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                            <motion.path
+                                                initial={{ pathLength: 0, opacity: 0 }}
+                                                animate={{ pathLength: 1, opacity: 1 }}
+                                                transition={{ duration: 0.8 }}
+                                                d="M 15 50 L 75 50"
+                                                stroke={themeColor.stroke}
+                                                strokeWidth="0.5"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                            />
                                         </svg>
                                         <div className="absolute bottom-4 right-4 bg-amber-900/80 text-amber-400 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-500/50 backdrop-blur-md">
                                             Multi-Stop Route
@@ -449,32 +478,36 @@ export const LogisticsEngineView = () => {
                     </div>
 
                     {/* 2. THE COMPARATIVE COST CHART (THE ROI) */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeMode}
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6 overflow-hidden"
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <h4 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
-                                    <Map className="w-4 h-4 text-emerald-400" /> Batching Efficiency
-                                </h4>
-                                <span className="text-[10px] text-gray-400 bg-gray-800 px-2 py-1 rounded">Scenario: {activeMode === 'green' ? '15 Orders' : activeMode === 'yellow' ? '5 Orders' : '1 Order'}</span>
-                            </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6 overflow-visible flex-shrink-0 min-h-[180px] flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                                <Map className="w-4 h-4 text-emerald-400" />
+                                {activeMode === 'red' ? 'Financial Discipline' : 'Batching Efficiency'}
+                            </h4>
+                            <span className="text-[10px] text-gray-400 bg-gray-800 px-2 py-1 rounded">Scenario: {activeMode === 'green' ? '15 Orders' : activeMode === 'yellow' ? '5 Orders' : '1 Order'}</span>
+                        </div>
 
+                        {activeMode === 'red' ? (
+                            <div className="py-0 flex flex-col items-center justify-center text-center">
+                                <ShieldCheck className="w-8 h-8 text-rose-500 mb-1" />
+                                <p className="text-lg text-white font-bold max-w-md mx-auto leading-tight">
+                                    100% At-Cost Delivery.<br />
+                                    <span className="text-sm font-medium text-rose-200 opacity-90">You pay exactly what it costs to get it to you.</span>
+                                </p>
+                            </div>
+                        ) : (
+                            /* Standard Bar Chart for Green/Yellow */
                             <div className="grid grid-cols-2 gap-8">
                                 {/* Competitor Side */}
                                 <div>
                                     <div className="flex justify-between text-xs text-gray-400 mb-2">
-                                        <span>Traditional App ({activeMode === 'green' ? 15 : activeMode === 'yellow' ? 5 : 1} Drivers)</span>
-                                        <span className="text-rose-400 font-bold"><NumberTicker value={mode.comparison.competitorCost} prefix="$" color="text-rose-400" /> Cost</span>
+                                        <span>Traditional App ({activeMode === 'green' ? 15 : 5} Drivers)</span>
+                                        <span className="text-rose-400 font-bold"><NumberTicker value={mode.comparison.competitorCost || 0} prefix="$" color="text-rose-400" /> Cost</span>
                                     </div>
                                     <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${(mode.comparison.competitorCost / Math.max(mode.comparison.competitorCost, mode.comparison.ourCost)) * 100}%` }}
+                                            animate={{ width: `${((mode.comparison.competitorCost || 0) / Math.max(mode.comparison.competitorCost || 1, mode.comparison.ourCost || 1)) * 100}%` }}
                                             transition={{ duration: 1, delay: 0.2 }}
                                             className="h-full bg-rose-500"
                                         />
@@ -484,20 +517,22 @@ export const LogisticsEngineView = () => {
                                 {/* Our Side */}
                                 <div>
                                     <div className="flex justify-between text-xs text-gray-400 mb-2">
-                                        <span>HungryBird (1 Driver, $25/hr)</span>
-                                        <span className="text-emerald-400 font-bold"><NumberTicker value={mode.comparison.ourCost} prefix="$" color="text-emerald-400" /> Cost</span>
+                                        <span>HungryBird ({activeMode === 'green' ? '1 Driver' : '1 Driver'})</span>
+                                        <span className="text-emerald-400 font-bold"><NumberTicker value={mode.comparison.ourCost || 0} prefix="$" color="text-emerald-400" /> Cost</span>
                                     </div>
                                     <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${(mode.comparison.ourCost / Math.max(mode.comparison.competitorCost, mode.comparison.ourCost)) * 100}%` }}
+                                            animate={{ width: `${((mode.comparison.ourCost || 0) / Math.max(mode.comparison.competitorCost || 1, mode.comparison.ourCost || 1)) * 100}%` }}
                                             transition={{ duration: 1, delay: 0.4 }}
                                             className="h-full bg-emerald-500"
                                         />
                                     </div>
                                 </div>
                             </div>
+                        )}
 
+                        {activeMode !== 'red' && (
                             <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
                                 <span className="text-gray-400 text-xs">Operational Result (1 Hr)</span>
                                 <span className={`text-2xl font-black ${mode.math.batchProfit >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
@@ -505,11 +540,11 @@ export const LogisticsEngineView = () => {
                                     <span className="text-sm font-normal text-gray-500 ml-2">{mode.math.batchProfit >= 0 ? 'Margin' : 'Loss'}</span>
                                 </span>
                             </div>
-                        </motion.div>
-                    </AnimatePresence>
+                        )}
+                    </div>
 
                     {/* 3. UNIT ECONOMICS ROW */}
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-2 gap-y-4 md:gap-y-0 text-center md:divide-x divide-white/10 border-t border-white/10 pt-6">
+                    <div className={`grid grid-cols-3 ${activeMode === 'red' ? 'md:grid-cols-3' : 'md:grid-cols-5'} gap-2 md:gap-2 gap-y-4 md:gap-y-0 text-center md:divide-x divide-white/10 border-t border-white/10 pt-6`}>
                         <div className="col-span-1">
                             <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Customer Pays</div>
                             <div className="text-white font-mono text-sm">
@@ -517,18 +552,24 @@ export const LogisticsEngineView = () => {
                                 <NumberTicker value={mode.math.customerFee} prefix="$" color="text-white font-bold" />
                             </div>
                         </div>
-                        <div className="col-span-1">
-                            <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Logistics Cost</div>
-                            <div className={`font-mono text-sm ${activeMode === 'green' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                -<NumberTicker value={mode.math.driverCost} prefix="$" color="currentColor" />
-                            </div>
-                        </div>
-                        <div className="col-span-1">
-                            <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Food Cost</div>
-                            <div className="text-gray-400 font-mono text-sm">
-                                -<NumberTicker value={mode.math.foodCost} prefix="$" color="text-gray-400" />
-                            </div>
-                        </div>
+
+                        {activeMode !== 'red' && (
+                            <>
+                                <div className="col-span-1">
+                                    <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Logistics Cost</div>
+                                    <div className={`font-mono text-sm ${activeMode === 'green' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        -<NumberTicker value={mode.math.driverCost} prefix="$" color="currentColor" />
+                                    </div>
+                                </div>
+                                <div className="col-span-1">
+                                    <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Food Cost</div>
+                                    <div className="text-gray-400 font-mono text-sm">
+                                        -<NumberTicker value={mode.math.foodCost} prefix="$" color="text-gray-400" />
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
                         <div className="col-span-3 md:col-span-2 bg-emerald-500/10 rounded-lg py-1 border border-emerald-500/20">
                             <div className={`text-[10px] uppercase tracking-wider mb-1 font-bold ${themeColor.text}`}>Hourly Profit</div>
                             <div className={`font-mono text-3xl md:text-4xl font-black ${mode.math.batchProfit >= 0 ? themeColor.text : 'text-rose-500'}`}>
@@ -539,7 +580,6 @@ export const LogisticsEngineView = () => {
                 </div>
             </div>
 
-            {/* --- SECTION 2 & 3 remain the same as previous version --- */}
             {/* --- SECTION 2: THE NUDGE (UI MOCKUP) --- */}
             <div className="grid md:grid-cols-2 gap-12 items-center py-12">
                 <div className="order-2 md:order-1 relative">
@@ -551,7 +591,6 @@ export const LogisticsEngineView = () => {
                                 <span className="font-bold text-gray-900">Tomorrow's Lunch</span>
                                 <span className="text-xs bg-gray-100 px-2 py-1 rounded">11:30 AM Lock</span>
                             </div>
-                            {/* Option Cards */}
                             <div className="p-4 space-y-3">
                                 {/* Green Option */}
                                 <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex gap-3 relative overflow-hidden">
@@ -561,11 +600,11 @@ export const LogisticsEngineView = () => {
                                     <div className="flex-1">
                                         <div className="text-xs font-bold text-emerald-700 uppercase mb-0.5">Recommended</div>
                                         <div className="font-bold text-gray-900 text-sm">Popeyes Chicken</div>
-                                        <div className="text-xs text-emerald-600 font-bold mt-1">15 Neighbors within 500m</div>
+                                        <div className="text-xs text-emerald-600 font-bold mt-1">15 Neighbors within 500 meters</div>
                                     </div>
                                     <div className="text-right">
                                         <div className="font-bold text-gray-900 text-sm">$12</div>
-                                        <div className="text-xs font-bold text-emerald-600 bg-white px-1.5 py-0.5 rounded shadow-sm">$0.99 DEL</div>
+                                        <div className="text-xs font-bold text-emerald-600 bg-white px-1.5 py-0.5 rounded shadow-sm">FREE DEL</div>
                                     </div>
                                 </div>
                                 {/* Red Option */}
@@ -586,7 +625,7 @@ export const LogisticsEngineView = () => {
                             {/* Button */}
                             <div className="p-4 mt-4">
                                 <div className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-center shadow-lg shadow-emerald-200 text-sm">
-                                    Join Batch & Save $7.00
+                                    Join Batch & Save $7.99
                                 </div>
                             </div>
                         </div>
@@ -602,14 +641,14 @@ export const LogisticsEngineView = () => {
                         We <span className="text-orange-500">guide</span> them.
                     </h2>
                     <p className="text-lg text-gray-600 leading-relaxed">
-                        80% of logistics cost is caused by "randomness." We use UI cues to herd users into "High Density" clusters (500m range).
+                        80% of logistics cost is caused by "randomness." We use UI cues to herd users into "High Density" clusters (500 meters range).
                     </p>
                     <ul className="space-y-4">
                         <li className="flex items-start gap-3">
                             <div className="p-1 bg-emerald-100 rounded text-emerald-600 mt-1"><ShieldCheck className="w-4 h-4" /></div>
                             <div>
                                 <strong className="block text-gray-900">The Price Anchor</strong>
-                                <span className="text-gray-500">We show the $7.99 fee for custom orders to make the $0.99 fee for batched orders look like a steal.</span>
+                                <span className="text-gray-500">We show the $7.99 fee for custom orders to make the FREE fee for batched orders look like a steal.</span>
                             </div>
                         </li>
                     </ul>
@@ -625,9 +664,9 @@ export const LogisticsEngineView = () => {
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {[
-                        { step: "01", title: "The Seed", desc: "A user pays the breakeven operation fee. We fulfill it via regular method. We acquire the customer.", color: "text-rose-500", bg: "bg-rose-100" },
-                        { step: "02", title: "The Unlock", desc: "App notifies user: 'Get 2 neighbors to join, and we unlock lower delivery for everyone.'", color: "text-amber-500", bg: "bg-amber-100" },
-                        { step: "03", title: "The Flip", desc: "Neighbors join. Density hits 3+. The zone flips to GREEN. We switch to internal fleet. Profit spikes.", color: "text-emerald-500", bg: "bg-emerald-100" }
+                        { step: "01", title: "The Seed", desc: "We only charge user the breakeven operation fee. We fulfill it via regular method. We acquire the customer.", color: "text-rose-500", bg: "bg-rose-100" },
+                        { step: "02", title: "The Unlock", desc: "App notifies user: 'Get 3 neighbors to join, and we unlock lower delivery for everyone.'", color: "text-amber-500", bg: "bg-amber-100" },
+                        { step: "03", title: "The Flip", desc: "Neighbors join. Density hits 3+. The zone flips to lower delivery. We switch to internal fleet. Profit spikes.", color: "text-emerald-500", bg: "bg-emerald-100" }
                     ].map((item, i) => (
                         <div key={i} className="relative bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                             <div className={`w-12 h-12 rounded-xl ${item.bg} ${item.color} flex items-center justify-center font-black text-xl mb-4`}>

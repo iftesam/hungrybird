@@ -28,49 +28,56 @@ class Seeder {
     }
 }
 
-export const getLogisticsInfo = (mealId, restaurantName, day = "today", index = 0, totalOptions = 5) => {
+export const getLogisticsInfo = (mealId, restaurantName, day = "today", index = 0, totalOptions = 5, extraGuests = 0) => {
     // 1. Create a stable seed for neighbors count randomization within the tier
     const seed = `${mealId}_${restaurantName}_${day}_${index}`;
     const rng = new Seeder(seed);
 
-    let mode, deliveryFee, neighbors, isAnomaly;
+    let baseNeighbors;
 
-    // Logic: 
-    // - First 2 options (0, 1): Green ($0.99)
-    // - Last 2 options: Red ($7.99)
-    // - Everything else: Yellow ($2.99)
+    // Logic for BASE neighbors (before guests): 
+    // - First 2 options (0, 1): Green (Free, 10+ neighbors)
+    // - Last 2 options: Red ($7.99, 0-3 neighbors)
+    // - Everything else: Yellow ($1.99, 4-9 neighbors)
 
-    // Safety check for small lists
     const isFirstTwo = index < 2;
-    const isLastTwo = index >= totalOptions - 2 && index >= 2; // Ensure we don't overlap if total is small (e.g. 3 options -> 0,1 green, 2 red)
+    const isLastTwo = index >= totalOptions - 2 && index >= 2;
 
     if (isFirstTwo) {
-        // GREEN MODE (High Density)
-        mode = "green";
-        deliveryFee = 0.99;
-        neighbors = rng.range(12, 45);
-        isAnomaly = false;
+        baseNeighbors = rng.range(10, 45); // 10+ neighbors
     } else if (isLastTwo) {
-        // RED MODE (Anomaly/Low Density)
+        baseNeighbors = rng.range(0, 3); // 0-3 neighbors
+    } else {
+        baseNeighbors = rng.range(4, 9); // 4-9 neighbors
+    }
+
+    // 2. Add Guests to Density
+    const neighbors = baseNeighbors + extraGuests;
+
+    // 3. Determine Mode & Price based on FINAL Density
+    let mode, deliveryFee, isAnomaly;
+
+    if (neighbors >= 10) {
+        mode = "green";
+        deliveryFee = 0.00;
+        isAnomaly = false;
+    } else if (neighbors >= 4) {
+        mode = "yellow";
+        deliveryFee = 1.99;
+        isAnomaly = false;
+    } else {
         mode = "red";
         deliveryFee = 7.99;
-        neighbors = 0; // "0 neighbors" as requested
-        isAnomaly = true;
-    } else {
-        // YELLOW MODE (Medium Density)
-        mode = "yellow";
-        deliveryFee = 2.99;
-        neighbors = rng.range(3, 11);
-        isAnomaly = false;
+        isAnomaly = true; // Low density
     }
 
     let description;
     if (mode === "green") {
-        description = `High Demand: With ${neighbors} neighbors ordering nearby, you might automatically qualify for our lowest 'Eco-Drop' rate.`;
+        description = `Viral Hit: With ${neighbors} neighbors (10+ orders), we've unlocked FREE delivery for the entire cluster!`;
     } else if (mode === "yellow") {
-        description = `Gathering Steam: ${neighbors} neighbors are on board. You might pay a standard fee, or even less if the group expands before the cutoff.`;
+        description = `Growing Fast: ${neighbors} neighbors joined (4-9 orders). Fee drops to $1.99. Reach 10+ to unlock FREE delivery!`;
     } else {
-        description = "Quiet Zone: You might pay a premium for a solo run, unless more neighbors join your batch before the lock-in time.";
+        description = "Start the Group: Be the first (1-3 orders) to anchor this batch. Fee is $7.99 until more neighbors join.";
     }
 
     return {

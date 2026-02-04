@@ -262,14 +262,18 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
                                     Neighborhood Density
                                 </span>
                                 <span className="text-xs font-bold text-gray-900">
-                                    {logistics.neighbors} <span className="text-gray-400 font-normal">/ 12 needed</span>
+                                    {logistics.neighbors} <span className="text-gray-400 font-normal">
+                                        {logistics.neighbors < 4 ? `/ 4 needed for $1.99` :
+                                            logistics.neighbors < 10 ? `/ 10 needed for FREE` :
+                                                "Neighbors (Unlocked)"}
+                                    </span>
                                 </span>
                             </div>
 
                             <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden relative">
                                 {/* Markers */}
-                                <div className="absolute left-[16.6%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
-                                <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
+                                <div className="absolute left-[33.3%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
+                                <div className="absolute left-[83.3%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
 
                                 <motion.div
                                     initial={{ width: 0 }}
@@ -284,10 +288,11 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
                             </div>
 
                             {/* Explicit Steps */}
-                            <div className="flex justify-between text-[9px] font-medium text-gray-400 pt-0.5">
-                                <span className={logistics.mode === 'red' ? "font-bold text-red-600" : ""}>Solo ($7.99)</span>
-                                <span className={logistics.mode === 'yellow' ? "font-bold text-amber-600" : ""}>Group ($2.99)</span>
-                                <span className={logistics.mode === 'green' ? "font-bold text-emerald-600" : ""}>Eco ($0.99)</span>
+                            {/* Explicit Steps */}
+                            <div className="relative h-4 text-[9px] font-medium text-gray-400 pt-1">
+                                <span className={cn("absolute left-0", logistics.mode === 'red' && "font-bold text-red-600")}>Solo ($7.99)</span>
+                                <span className={cn("absolute left-[33.3%] -translate-x-1/2", logistics.mode === 'yellow' && "font-bold text-amber-600")}>Group ($1.99)</span>
+                                <span className={cn("absolute right-0", logistics.mode === 'green' && "font-bold text-emerald-600")}>Eco (Free)</span>
                             </div>
                         </div>
 

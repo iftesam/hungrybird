@@ -40,7 +40,7 @@ import { MealCard } from "@/components/MealCard";
 import { BudgetModal } from "@/components/BudgetModal";
 
 
-const QA_MODE = true; // Enable QA Mode for testing
+const QA_MODE = false; // Enable QA Mode for testing
 
 export const ScheduleView = () => {
     // 1. Context & State Hooks
@@ -163,12 +163,18 @@ export const ScheduleView = () => {
                 // Calculate "Effective Index" based on modulo to ensure it cycles correctly visually
                 const effectiveIndex = currentSwapCount % totalOptions;
 
+                // Calculate Guests (Batch Size - Self)
+                const restaurantName = item.vendor?.name || item.restaurant;
+                const sameRestaurantItems = slotItems.filter(i => (i.vendor?.name || i.restaurant) === restaurantName);
+                const extraGuests = Math.max(0, sameRestaurantItems.length - 1);
+
                 map[item.id] = getLogisticsInfo(
                     item.id,
-                    item.vendor?.name || item.restaurant || "Unknown",
+                    restaurantName || "Unknown",
                     "today",
                     effectiveIndex,
-                    totalOptions
+                    totalOptions,
+                    extraGuests
                 );
             });
         });
@@ -425,7 +431,56 @@ export const ScheduleView = () => {
     const { updateMealPlan, addGuestMeal, removeGuestMeal, swapSpecificMeal, toggleSkip } = actions;
 
     const handleSwap = (slotId, itemId) => {
-        swapSpecificMeal(slotId, itemId);
+        const slotItems = items[slotId] || [];
+        const currentItem = slotItems.find(i => i.id === itemId);
+        if (!currentItem) return;
+
+        // 1. Determine Next Candidate
+        const context = { profile, financials, cuisines, restaurantPrefs, mealPrefs };
+        let candidates = [];
+
+        if (currentItem.role === "guest") {
+            const host = slotItems.find(i => i.role === "host") || slotItems[0];
+            candidates = findSmartSwap(slotId, items, { ...context, requiredRestaurant: host.vendor.name });
+        } else {
+            candidates = findSmartSwap(slotId, items, context);
+        }
+
+        if (!candidates || candidates.length === 0) return;
+
+        const currentCount = swapCounts[itemId] || 0;
+        const nextIndex = (currentCount + 1) % candidates.length;
+        const nextItem = candidates[nextIndex];
+
+        // 2. Calculate Financial Impact
+        // Remove Current Item Impact
+        const currentFee = logisticsMap[itemId]?.deliveryFee || 0;
+        const currentCostWithTax = (currentItem.price + currentFee) * (1 + TAX_RATE);
+
+        // Add Next Item Impact (With Safety Net Fee of $7.99)
+        const SAFETY_FEE = 7.99;
+        const nextCostWithTax = (nextItem.price + SAFETY_FEE) * (1 + TAX_RATE);
+
+        const projectedTotal = finalTotal - currentCostWithTax + nextCostWithTax;
+        const currentLimit = mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY;
+
+        // 3. Check Constraint
+        if (projectedTotal > currentLimit + 0.10) { // Small float buffer
+            setBudgetModal({
+                isOpen: true,
+                data: {
+                    type: "swap", // Custom type handling in modal
+                    slotId,
+                    itemId,
+                    currentLimit,
+                    newTotal: projectedTotal,
+                    mealCost: nextItem.price,
+                    onConfirm: () => swapSpecificMeal(slotId, itemId) // Allow override if modal permits
+                }
+            });
+        } else {
+            swapSpecificMeal(slotId, itemId);
+        }
     };
 
     const handleAddGuest = (slotId) => {
@@ -445,7 +500,14 @@ export const ScheduleView = () => {
         if (newTotal > currentLimit + 0.50) {
             setBudgetModal({
                 isOpen: true,
-                data: { slotId, currentLimit, newTotal, mealCost: hostItem.price }
+                data: {
+                    type: "guest",
+                    slotId,
+                    currentLimit,
+                    newTotal,
+                    mealCost: hostItem.price,
+                    onConfirm: () => addGuestMeal(slotId)
+                }
             });
         } else {
             addGuestMeal(slotId);
@@ -455,71 +517,89 @@ export const ScheduleView = () => {
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-4 pb-8">
             {/* Header Section */}
-            <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Schedule</h1>
+            {/* Header Section - Enhanced Google Material Design */}
+            <div className="flex flex-col gap-6 mb-2">
+                <div className="flex items-end justify-between">
+                    <div>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tighter mb-1">
+                            Schedule
+                        </h1>
+                        <p className="text-gray-500 font-medium flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                        </p>
+                    </div>
+
+                    {/* Visual Status Indicator */}
                     <div className={cn(
-                        "px-3 py-1.5 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-colors shadow-sm",
+                        "hidden md:flex px-4 py-2 rounded-full border items-center gap-2 font-bold text-xs uppercase tracking-wider backdrop-blur-md",
                         isOverBudget
-                            ? "bg-red-50 text-red-700 border-red-100"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                            ? "bg-red-50/50 border-red-200 text-red-700"
+                            : "bg-emerald-50/50 border-emerald-200 text-emerald-700"
                     )}>
-                        <DollarSign className="w-3.5 h-3.5" />
-                        <span className="text-sm">{finalTotal.toFixed(2)}</span>
+                        {isOverBudget ? (
+                            <> <AlertCircle className="w-4 h-4" /> Over Budget </>
+                        ) : (
+                            <> <CheckCircle2 className="w-4 h-4" /> On Track </>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    {/* Today's Date Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-2xl py-3 px-4 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.08)] border border-gray-100 flex-1"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                                <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
-                                    Today
-                                </span>
-                            </div>
-                            <div className="w-px h-4 bg-gray-200" />
-                            <span className="text-base font-medium text-gray-900">
-                                {new Date().toLocaleDateString('en-US', {
-                                    month: 'long', day: 'numeric', year: 'numeric'
-                                }).replace(/(\d+)/, (match) => {
-                                    const num = parseInt(match);
-                                    const suffix = [1, 21, 31].includes(num) ? 'st' : [2, 22].includes(num) ? 'nd' : [3, 23].includes(num) ? 'rd' : 'th';
-                                    return `${num}${suffix}`;
-                                })}
-                            </span>
+                {/* KPI Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* Card 1: Daily Spend */}
+                    <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                            <DollarSign className="w-16 h-16 text-gray-900" />
                         </div>
-                    </motion.div>
+                        <div className="relative z-10">
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Spend</div>
+                            <div className={cn("text-3xl font-black tracking-tight", isOverBudget ? "text-red-600" : "text-gray-900")}>
+                                ${finalTotal.toFixed(2)}
+                            </div>
+                            <div className="text-xs font-medium text-gray-500 mt-1">
+                                incl. tax & fees
+                            </div>
+                        </div>
+                    </div>
 
-                    {/* Integrated Budget Indicator */}
-                    <motion.div
-                        className={cn(
-                            "hidden md:flex px-4 py-2 rounded-2xl border items-center gap-4 bg-white transition-all shadow-sm",
-                            mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] ? "border-emerald-100" : "border-gray-100"
-                        )}
-                    >
-                        <div className="flex flex-col leading-none">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Limit</span>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-lg font-bold text-gray-900">
-                                    ${(mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
-                                </span>
-                                {mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] && (
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                )}
+                    {/* Card 2: Budget Limit */}
+                    <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                            <Lock className="w-16 h-16 text-indigo-900" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Daily Limit</div>
+                            <div className="text-3xl font-black text-indigo-600 tracking-tight">
+                                ${(mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY).toFixed(2)}
+                            </div>
+                            {/* Visual Progress Line */}
+                            <div className="w-full h-1.5 bg-gray-100 rounded-full mt-3 overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, (finalTotal / (mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY)) * 100)}%` }}
+                                    className={cn("h-full rounded-full", isOverBudget ? "bg-red-500" : "bg-emerald-500")}
+                                />
                             </div>
                         </div>
-                        <div className="flex items-end gap-1 h-5">
-                            {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
-                                <div key={i} className="w-1 bg-emerald-100 rounded-full" style={{ height: `${h * 100}%` }} />
-                            ))}
+                    </div>
+
+                    {/* Card 3: Nutrition (Calories) */}
+                    <div className="col-span-2 md:col-span-1 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                            <Sparkles className="w-16 h-16 text-orange-500" />
                         </div>
-                    </motion.div>
+                        <div className="relative z-10">
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nutrition</div>
+                            <div className="text-3xl font-black text-gray-900 tracking-tight flex items-baseline gap-1">
+                                {Object.values(items).reduce((acc, slot) => acc + (slot ? slot.reduce((sAcc, m) => sAcc + (m.nutrition?.cals || 0), 0) : 0), 0)}
+                                <span className="text-sm text-gray-400 font-bold">kcal</span>
+                            </div>
+                            <div className="text-xs font-medium text-orange-500 mt-1">
+                                Estimated Total
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -671,7 +751,12 @@ export const ScheduleView = () => {
                 onClose={() => setBudgetModal({ isOpen: false, data: null })}
                 onConfirm={() => {
                     actions.authorizeBudgetIncrease(new Date().toDateString(), budgetModal.data.newTotal);
-                    addGuestMeal(budgetModal.data.slotId);
+                    if (budgetModal.data?.onConfirm) {
+                        budgetModal.data.onConfirm();
+                    } else {
+                        // Fallback/Legacy behavior if onConfirm is missing
+                        addGuestMeal(budgetModal.data.slotId);
+                    }
                     setBudgetModal({ isOpen: false, data: null });
                 }}
                 currentLimit={budgetModal.data?.currentLimit || 0}
