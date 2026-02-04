@@ -12,7 +12,10 @@ import {
     Brain,
     Clock,
     DollarSign,
-    Flame
+    Flame,
+    ShieldCheck,
+    Thermometer,
+    Leaf
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { clsx } from "clsx";
@@ -277,6 +280,39 @@ export default function WhyHungryBird() {
                     doodleSrc="/doodles/diet_balance.png"
                     color={{ bg: "bg-[#EA4335]", card: "bg-red-50/50 border-red-100", text: "text-red-900" }}
                     icon={Flame}
+                />
+                <Section
+                    index={5}
+                    title="The 'Gig Guilt' Tax"
+                    reality="You enjoy the convenience, but deep down, you know the driver is scrambling for $3 per order. It feels exploitative because it is."
+                    cost="A silent moral tax every time you hit order. You rely on a system that burns out the people serving you."
+                    solution="The $25/hr Standard. We don't tip-bait. We pay a living wage. You aren't ordering a servant; you are hiring a professional."
+                    doodleSrc="/doodles/ethical_standard.png"
+                    color={{ bg: "bg-[#6366f1]", card: "bg-indigo-50/50 border-indigo-100", text: "text-indigo-900" }}
+                    icon={ShieldCheck}
+                />
+
+                <Section
+                    index={6}
+                    isReversed
+                    title="The 'Cold Fries' Paradox"
+                    reality="Traditional drivers zig-zag across the city to maximize their earnings, not your food quality. Your meal sits in the back seat for 40 minutes while they drop off a taco 3 miles away."
+                    impact="Soggy fries. Lukewarm soup. The convenience of delivery destroys the joy of the meal."
+                    solution="The 500m Cluster. One pickup. One drop-off location (yours). No detours. No zig-zags. The food arrives the way the chef intended."
+                    doodleSrc="/doodles/food_quality.png"
+                    color={{ bg: "bg-[#f97316]", card: "bg-orange-50/50 border-orange-100", text: "text-orange-900" }}
+                    icon={Thermometer}
+                />
+
+                <Section
+                    index={7}
+                    title="The 'Driveway' Traffic Jam"
+                    reality="15 neighbors order dinner. 15 different cars show up. 15 times the emissions, the traffic, and the chaos."
+                    cost="Incredible inefficiency. We are clogging our own cities just to eat lunch."
+                    solution="The Green Batch. One car. 15 meals. You actively lower your carbon footprint just by eating lunch."
+                    doodleSrc="/doodles/eco_batch.png"
+                    color={{ bg: "bg-[#10b981]", card: "bg-emerald-50/50 border-emerald-100", text: "text-emerald-900" }}
+                    icon={Leaf}
                 />
 
                 {/* --- CONCLUSION: THE HAPPY VIBE --- */}
