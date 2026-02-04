@@ -1,12 +1,12 @@
 import React from "react";
-import { CheckCircle2, XCircle, PlusCircle, RefreshCw, Lock, Clock, MapPin, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, PlusCircle, RefreshCw, Lock, Clock, MapPin, AlertTriangle, Users, Truck, Info, Sparkles, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
-export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAddGuest, deliveryInfo, swapIndex = 0, totalSwaps = 5, isLocked = false, isDelivered = false, role = "host", isSplitRestaurant = false }) => {
+export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAddGuest, deliveryInfo, swapIndex = 0, totalSwaps = 5, isLocked = false, isDelivered = false, role = "host", isSplitRestaurant = false, logistics }) => {
     if (!meal) return null;
 
     const isGuest = role === "guest";
@@ -212,6 +212,108 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
                         <span className="text-[10px] font-bold text-amber-700 leading-tight">
                             Split Restaurant Choice: This guest meal incurs a separate delivery fee.
                         </span>
+                    </div>
+                )}
+
+                {/* Google-Style Logistics Card */}
+                {!isLocked && !isSkipped && logistics && (
+                    <div className={cn(
+                        "mx-4 mb-4 p-4 rounded-xl border transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)]",
+                        logistics.mode === "green" ? "bg-emerald-50/40 border-emerald-100" :
+                            logistics.mode === "yellow" ? "bg-amber-50/40 border-amber-100" :
+                                "bg-red-50/40 border-red-100"
+                    )}>
+
+                        {/* 1. Header with Urgency Signal */}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <span className={cn(
+                                    "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5",
+                                    logistics.mode === "green" ? "bg-emerald-100 text-emerald-700" :
+                                        logistics.mode === "yellow" ? "bg-amber-100 text-amber-700 hover:animate-pulse cursor-default" :
+                                            "bg-red-100 text-red-700"
+                                )}>
+                                    {logistics.mode === "green" && <Sparkles className="w-3 h-3" />}
+                                    {logistics.mode === "yellow" && <TrendingUp className="w-3 h-3" />}
+                                    {logistics.mode === "red" && <AlertTriangle className="w-3 h-3" />}
+
+                                    {logistics.mode === "green" ? "BEST PRICE" :
+                                        logistics.mode === "yellow" ? "GAINING MOMENTUM" :
+                                            "SURGE PRICING"}
+                                </span>
+                            </div>
+                            <div className="text-right">
+                                <div className={cn(
+                                    "text-lg font-black leading-none",
+                                    logistics.mode === "green" ? "text-emerald-700" :
+                                        logistics.mode === "yellow" ? "text-amber-700" :
+                                            "text-red-700"
+                                )}>
+                                    ${logistics.deliveryFee.toFixed(2)}
+                                </div>
+                                <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Delivery Fee</div>
+                            </div>
+                        </div>
+
+                        {/* 2. Google Material Density Meter */}
+                        <div className="space-y-2 mb-3">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                                    Neighborhood Density
+                                </span>
+                                <span className="text-xs font-bold text-gray-900">
+                                    {logistics.neighbors} <span className="text-gray-400 font-normal">/ 12 needed</span>
+                                </span>
+                            </div>
+
+                            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden relative">
+                                {/* Markers */}
+                                <div className="absolute left-[16.6%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
+                                <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-white mix-blend-overlay z-10 opacity-50" />
+
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, (logistics.neighbors / 12) * 100)}%` }}
+                                    transition={{ duration: 1.2, ease: "easeOut" }}
+                                    className={cn("h-full rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]",
+                                        logistics.mode === "green" ? "bg-gradient-to-r from-emerald-400 to-emerald-500" :
+                                            logistics.mode === "yellow" ? "bg-gradient-to-r from-amber-400 to-amber-500" :
+                                                "bg-gradient-to-r from-red-400 to-red-500"
+                                    )}
+                                />
+                            </div>
+
+                            {/* Explicit Steps */}
+                            <div className="flex justify-between text-[9px] font-medium text-gray-400 pt-0.5">
+                                <span className={logistics.mode === 'red' ? "font-bold text-red-600" : ""}>Solo ($7.99)</span>
+                                <span className={logistics.mode === 'yellow' ? "font-bold text-amber-600" : ""}>Group ($2.99)</span>
+                                <span className={logistics.mode === 'green' ? "font-bold text-emerald-600" : ""}>Eco ($0.99)</span>
+                            </div>
+                        </div>
+
+                        {/* 3. Narrative Insight */}
+                        {logistics.description && (
+                            <div className="flex gap-2.5 items-start mt-2 pt-2 border-t border-black/5">
+                                <div className={cn(
+                                    "p-1 rounded-md shrink-0 mt-0.5",
+                                    logistics.mode === "green" ? "bg-emerald-100 text-emerald-600" :
+                                        logistics.mode === "yellow" ? "bg-amber-100 text-amber-600" :
+                                            "bg-red-100 text-red-600"
+                                )}>
+                                    <Info className="w-3 h-3" />
+                                </div>
+                                <p className="text-[11px] leading-snug text-gray-600">
+                                    <span className={cn("font-bold block text-xs mb-0.5",
+                                        logistics.mode === "green" ? "text-emerald-800" :
+                                            logistics.mode === "yellow" ? "text-amber-800" :
+                                                "text-red-800"
+                                    )}>
+                                        {logistics.description.split(/:(.+)/)[0]}
+                                    </span>
+                                    {logistics.description.split(/:(.+)/)[1]}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 

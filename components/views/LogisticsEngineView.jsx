@@ -64,7 +64,7 @@ const MODES = {
         description: "Direct point-to-point. Traditional Model.",
         logistics: "Direct Courier",
         pricing: "$5.99 Standard",
-        driverAction: "Normal Model",
+        driverAction: "Gig Network",
         math: {
             revenue: 10.49, // Commission ($4.50) + Fee ($5.99)
             foodCost: 10.50,
@@ -313,19 +313,45 @@ export const LogisticsEngineView = () => {
                                 {/* --- GREEN MODE VISUALS --- */}
                                 {activeMode === 'green' && (
                                     <>
-                                        {/* The 500m Radius */}
-                                        <div className="absolute right-10 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border border-emerald-500/30 bg-emerald-500/10 animate-pulse flex items-center justify-center z-10">
-                                            <div className="text-[10px] text-emerald-400 font-bold bg-gray-900/80 px-2 py-1 rounded-full">500m Cluster</div>
-                                        </div>
-                                        {/* The Orders inside Radius */}
-                                        <div className="absolute right-14 top-1/2 -translate-y-1/2 grid grid-cols-4 gap-3 z-10">
-                                            {[...Array(15)].map((_, i) => (
-                                                <motion.div
-                                                    key={i}
-                                                    initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.05 }}
-                                                    className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#10b981]"
-                                                />
-                                            ))}
+                                        {/* The 500m Radius & Shared Drop Zone */}
+                                        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 rounded-full border border-emerald-500/30 bg-emerald-500/5 flex items-center justify-center z-10">
+
+                                            {/* Label */}
+                                            <div className="absolute -top-3 z-20">
+                                                <div className="text-[10px] text-emerald-400 font-bold bg-gray-900 border border-emerald-500/30 px-2 py-1 rounded-full shadow-lg">
+                                                    500m High Density
+                                                </div>
+                                            </div>
+
+                                            {/* Pulse Ring */}
+                                            <div className="absolute inset-0 rounded-full animate-pulse bg-emerald-400/5"></div>
+
+                                            {/* Scattered Orders (Deterministic Chaos) */}
+                                            {[...Array(18)].map((_, i) => {
+                                                // Create a deterministic "scatter" using polar coordinates
+                                                // Golden angle approx for even distribution without grid look
+                                                const angle = i * 2.399;
+                                                // Radius dist: roughly proportional to sqrt of index to maintain even density
+                                                const radius = 20 + (Math.sqrt(i) * 6); // 20% min offset, up to ~45%
+
+                                                // Convert to Cartesian % (Center is 50, 50)
+                                                // Use some variance in the formula to make it look less like a perfect spiral
+                                                const x = 50 + (radius * Math.cos(angle));
+                                                const y = 50 + (radius * Math.sin(angle));
+
+                                                return (
+                                                    <motion.div
+                                                        key={i}
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        transition={{ delay: i * 0.03, type: "spring" }}
+                                                        style={{ left: `${x}%`, top: `${y}%` }}
+                                                        className="absolute w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_#10b981] z-20"
+                                                    >
+                                                        {/* Tiny connector line to center to imply 'milkman' route connection (optional, maybe too messy) */}
+                                                    </motion.div>
+                                                );
+                                            })}
                                         </div>
                                         {/* The Path */}
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
@@ -458,7 +484,7 @@ export const LogisticsEngineView = () => {
                                 {/* Our Side */}
                                 <div>
                                     <div className="flex justify-between text-xs text-gray-400 mb-2">
-                                        <span>HungryBird (1 Driver)</span>
+                                        <span>HungryBird (1 Driver, $25/hr)</span>
                                         <span className="text-emerald-400 font-bold"><NumberTicker value={mode.comparison.ourCost} prefix="$" color="text-emerald-400" /> Cost</span>
                                     </div>
                                     <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
@@ -505,7 +531,7 @@ export const LogisticsEngineView = () => {
                         </div>
                         <div className="col-span-3 md:col-span-2 bg-emerald-500/10 rounded-lg py-1 border border-emerald-500/20">
                             <div className={`text-[10px] uppercase tracking-wider mb-1 font-bold ${themeColor.text}`}>Hourly Profit</div>
-                            <div className={`font-mono text-xl font-black ${mode.math.batchProfit >= 0 ? themeColor.text : 'text-rose-500'}`}>
+                            <div className={`font-mono text-3xl md:text-4xl font-black ${mode.math.batchProfit >= 0 ? themeColor.text : 'text-rose-500'}`}>
                                 <NumberTicker value={mode.math.batchProfit} prefix="$" color="currentColor" />
                             </div>
                         </div>

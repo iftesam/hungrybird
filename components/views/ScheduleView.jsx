@@ -35,9 +35,12 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 import { OrderCountdown } from "@/components/OrderCountdown";
 import { findSmartSwap, isMealSafe } from "@/utils/SwapLogistics";
+import { getLogisticsInfo } from "@/utils/LogisticsSimulation";
 import { MealCard } from "@/components/MealCard";
 import { BudgetModal } from "@/components/BudgetModal";
 
+
+const QA_MODE = true; // Enable QA Mode for testing
 
 export const ScheduleView = () => {
     // 1. Context & State Hooks
@@ -55,6 +58,11 @@ export const ScheduleView = () => {
         if (!isLoaded) return;
 
         const checkAllLocked = () => {
+            if (QA_MODE) {
+                setIsAllOrdersLocked(false);
+                return;
+            }
+
             const now = new Date();
             const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
             const currentDayStr = days[now.getDay()];
@@ -143,6 +151,29 @@ export const ScheduleView = () => {
         });
         return map;
     }, [schedule, profile, financials, cuisines, restaurantPrefs, mealPrefs, isLoaded]);
+
+    // Calculate Logistics (Delivery Fees & Neighbors) - Memoized for stability
+    const logisticsMap = useMemo(() => {
+        const map = {};
+        Object.entries(schedule).forEach(([slot, slotItems]) => {
+            if (!slotItems) return;
+            slotItems.forEach(item => {
+                const totalOptions = swapOptionsMap[item.id] || 5; // Default to 5 if unknown
+                const currentSwapCount = swapCounts[item.id] || 0;
+                // Calculate "Effective Index" based on modulo to ensure it cycles correctly visually
+                const effectiveIndex = currentSwapCount % totalOptions;
+
+                map[item.id] = getLogisticsInfo(
+                    item.id,
+                    item.vendor?.name || item.restaurant || "Unknown",
+                    "today",
+                    effectiveIndex,
+                    totalOptions
+                );
+            });
+        });
+        return map;
+    }, [schedule, swapCounts, swapOptionsMap]);
 
     // 4. Generation Effect Hook (Re-ordered to top)
     useEffect(() => {
@@ -378,9 +409,14 @@ export const ScheduleView = () => {
 
     // 6. Final Calculations for Render
     const items = mealPlan?.items || {};
+
     const preTaxTotal = Object.entries(items).reduce((acc, [type, slotItems]) => {
         if (skipped.includes(type)) return acc;
-        return acc + (slotItems?.reduce((slotAcc, item) => slotAcc + (item?.price || 0), 0) || 0);
+        return acc + (slotItems?.reduce((slotAcc, item) => {
+            const itemPrice = item?.price || 0;
+            const fee = logisticsMap[item.id]?.deliveryFee || 0;
+            return slotAcc + itemPrice + fee;
+        }, 0) || 0);
     }, 0);
     const taxAmount = preTaxTotal * TAX_RATE;
     const finalTotal = preTaxTotal + taxAmount;
@@ -397,7 +433,13 @@ export const ScheduleView = () => {
         if (itemsInSlot.length === 0) return;
 
         const hostItem = itemsInSlot[0];
-        const newTotal = finalTotal + (hostItem.price * (1 + TAX_RATE));
+        const hostLogistics = logisticsMap[hostItem.id];
+        const fee = hostLogistics?.deliveryFee || 0;
+
+        // Fee is taxed if included in preTaxTotal logic above, so we mimic that structure
+        const itemCostWithTax = hostItem.price * (1 + TAX_RATE);
+        const feeWithTax = fee * (1 + TAX_RATE);
+        const newTotal = finalTotal + itemCostWithTax + feeWithTax;
         const currentLimit = mealPlan?.meta?.authorizedBudgets?.[new Date().toDateString()] || TARGET_DAILY;
 
         if (newTotal > currentLimit + 0.50) {
@@ -539,8 +581,8 @@ export const ScheduleView = () => {
                             endTime.setHours(h + 1);
                             const lockTime = new Date(startTime.getTime() - 60 * 60000); // 1 hour
 
-                            isLocked = now >= lockTime;
-                            isDelivered = now >= endTime;
+                            isLocked = QA_MODE ? false : now >= lockTime;
+                            isDelivered = QA_MODE ? false : now >= endTime;
                             const fmt = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                             deliveryInfo = {
                                 time: `${fmt(startTime)} - ${fmt(endTime)}`,
@@ -608,6 +650,7 @@ export const ScheduleView = () => {
                                                     isDelivered={isDelivered}
                                                     role={meal.role}
                                                     isSplitRestaurant={isSplitRestaurant}
+                                                    logistics={logisticsMap[meal.id]}
                                                 />
                                             </motion.div>
                                         );
