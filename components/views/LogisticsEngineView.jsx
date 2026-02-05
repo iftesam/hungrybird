@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Users, Truck, Zap, TrendingUp, ShieldCheck,
+    Users, Car, Zap, TrendingUp, ShieldCheck,
     Navigation, ArrowRight, Map, CheckCircle2, XCircle, Info
 } from "lucide-react";
 
@@ -316,7 +316,7 @@ export const LogisticsEngineView = () => {
                                 {/* Center Hub (Restaurant) */}
                                 <div className="absolute left-10 top-1/2 -translate-y-1/2 z-30">
                                     <div className="w-12 h-12 bg-white rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center relative">
-                                        <Truck className="w-6 h-6 text-gray-900" />
+                                        <Car className="w-6 h-6 text-gray-900" />
                                         {/* Hub Pulse */}
                                         <div className={`absolute inset-0 rounded-xl animate-ping opacity-30 ${themeColor.bg}`}></div>
                                     </div>

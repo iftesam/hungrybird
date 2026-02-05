@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Bike, Compass, Truck } from "lucide-react";
+import { MapPin, Navigation, Bike, Compass, Car } from "lucide-react";
 
 export const DeliveryMap = ({ status = "active" }) => {
     // If delivered, car stays at the end (100%)
@@ -93,7 +93,7 @@ export const DeliveryMap = ({ status = "active" }) => {
                            So no transform needed for direction, maybe just for style? 
                            Actually, let's keep it simple. Standard Truck faces right. 
                         */}
-                        <Truck className="w-6 h-6 text-gray-900" />
+                        <Car className="w-6 h-6 text-gray-900" />
                         {/* Hub Pulse - hardcoded for dashboard to match active feel */}
                         <div className="absolute inset-0 rounded-xl animate-ping opacity-30 bg-emerald-500"></div>
                     </div>
