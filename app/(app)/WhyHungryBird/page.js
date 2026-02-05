@@ -180,43 +180,114 @@ export default function WhyHungryBird() {
             />
 
             {/* --- HERO SECTION --- */}
-            <header className="relative min-h-[95vh] flex flex-col items-center justify-center px-6 overflow-hidden">
+            <header className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-hidden py-12 lg:py-0">
                 {/* Background Orbs */}
                 <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[120px] -z-10 animate-pulse" />
                 <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-red-100/30 rounded-full blur-[100px] -z-10" />
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8, rotate: -20 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="mb-12"
-                >
-                    <img src="/logo.png" alt="HungryBird" className="w-32 h-32 md:w-40 md:h-40 drop-shadow-2xl" />
-                </motion.div>
+                <div className="w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
 
-                <div className="w-full px-8 md:px-16 lg:px-24 text-center space-y-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                    >
-                        <h1 className="text-5xl md:text-[8rem] font-[1000] tracking-[-0.02em] leading-[0.8] text-gray-900 text-center">
-                            Built for <br />
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC04] to-[#34A853] animate-gradient-x px-4">
-                                Assurance.
-                            </span>
-                        </h1>
-                    </motion.div>
+                    {/* LEFT COLUMN: Text Content */}
+                    <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8 order-2 lg:order-1">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, rotate: -20 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                            <img src="/logo.png" alt="HungryBird" className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl" />
+                        </motion.div>
 
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.8 }}
-                        className="text-xl md:text-2xl text-gray-400 font-medium tracking-tight max-w-3xl mx-auto leading-tight"
-                    >
-                        Every detail is engineered to liberate your focus. <br />
-                        <span className="text-gray-900 font-black">This is food on autopilot.</span>
-                    </motion.p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                        >
+                            <h1 className="text-5xl md:text-7xl lg:text-[7rem] font-[1000] tracking-[-0.02em] leading-[0.9] text-gray-900">
+                                Built for <br />
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC04] to-[#34A853] animate-gradient-x">
+                                    Assurance.
+                                </span>
+                            </h1>
+                        </motion.div>
+
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.8 }}
+                            className="text-xl md:text-2xl text-gray-400 font-medium tracking-tight max-w-lg leading-tight"
+                        >
+                            Every detail is engineered to liberate your focus. <br />
+                            <span className="text-gray-900 font-black">This is food on autopilot.</span>
+                        </motion.p>
+                    </div>
+
+                    {/* RIGHT COLUMN: Story Card */}
+                    <div className="flex justify-center lg:justify-end w-full order-1 lg:order-2">
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1, delay: 0.5, ease: "circOut" }}
+                            className="relative w-full max-w-[420px]"
+                        >
+                            <div className="relative group w-full pointer-events-auto hover:scale-[1.02] transition-transform duration-500 ease-out">
+                                {/* Glow Effect */}
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 rounded-[2rem] blur opacity-30 group-hover:opacity-50 transition duration-1000 animate-gradient-x" />
+
+                                <div className="relative bg-white/95 backdrop-blur-2xl border border-white/40 p-8 rounded-[2rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.2)]">
+                                    {/* Header Badge */}
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-gray-500">Case Study</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Headlines */}
+                                    <h3 className="text-2xl font-black text-gray-900 leading-tight mb-2">
+                                        The Louisiana Tech University <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Experiment</span>
+                                    </h3>
+                                    <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">
+                                        1 Week. 100 Students.
+                                    </p>
+
+                                    {/* The Narrative */}
+                                    <div className="mb-8 relative">
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-transparent opacity-30 rounded-full" />
+                                        <p className="pl-4 text-sm text-gray-600 leading-relaxed font-medium">
+                                            To test demand, we ran a 1-week pilot with <strong className="text-gray-900">100 students</strong>. We used Ollama agents to automate their meal choices, while our Logistics Engine successfully batched and fulfilled the orders.
+                                        </p>
+                                        <p className="pl-4 text-sm text-gray-600 leading-relaxed font-medium mt-3">
+                                            The results were immediate: <strong className="text-gray-900">500+ orders</strong> in 7 days, averaging <strong className="text-gray-900">5 meals</strong> per user. We didn't just get positive feedback—we effectively replaced their campus dining.
+                                        </p>
+                                    </div>
+
+                                    {/* Visual Metrics */}
+                                    <div className="grid grid-cols-1 gap-4 mb-8">
+                                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex flex-col items-center text-center">
+                                            <span className="text-3xl font-black text-gray-900">500+</span>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Orders Processed</span>
+                                        </div>
+                                    </div>
+
+                                    {/* The Quote */}
+                                    <div className="bg-[#FA651E] p-6 rounded-2xl text-white shadow-xl shadow-orange-600/20 relative overflow-hidden">
+                                        <div className="absolute -right-4 -top-4 text-orange-200 opacity-20">
+                                            <Zap className="w-24 h-24 rotate-12" />
+                                        </div>
+                                        <p className="text-lg font-bold leading-tight italic relative z-10">
+                                            "When is this launching for real?"
+                                        </p>
+                                        <div className="mt-3 flex items-center gap-2 opacity-80">
+                                            <div className="w-1 h-1 bg-white rounded-full" />
+                                            <span className="text-xs font-medium">Unanimous Student Feedback</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+
                 </div>
 
                 <motion.div
