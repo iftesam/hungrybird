@@ -36,7 +36,7 @@ const MODES = {
         label: "Mode B: The Shuttle",
         badge: "Medium Density",
         color: "amber",
-        icon: Truck,
+        icon: Car,
         description: "Small batches (4-9 orders).",
         logistics: "Multi-Stop Batch",
         pricing: "$1.99 Fee",
