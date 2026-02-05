@@ -134,10 +134,7 @@ export const AppLayout = ({ children }) => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-500">
-                            <Search className="w-4 h-4" />
-                            <input type="text" placeholder="Search..." className="bg-transparent border-none focus:outline-none w-32" />
-                        </div>
+
 
                         <div className="relative z-50">
                             <button

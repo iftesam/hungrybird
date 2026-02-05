@@ -16,7 +16,7 @@ const MODES = {
         description: "10+ orders within 500 meters.",
         logistics: "Proximity Batching (500 meters)",
         pricing: "FREE Delivery",
-        driverAction: "Hourly Wage: $25",
+        driverAction: "Per Loop: $25",
         math: {
             revenue: 4.50, // Commission ($4.50) + Fee ($0.00)
             foodCost: 10.50,
@@ -40,7 +40,7 @@ const MODES = {
         description: "Small batches (4-9 orders).",
         logistics: "Multi-Stop Batch",
         pricing: "$1.99 Fee",
-        driverAction: "Hourly Wage: $25",
+        driverAction: "Per Loop: $25",
         math: {
             revenue: 6.49, // Commission ($4.50) + Fee ($1.99)
             foodCost: 10.50,

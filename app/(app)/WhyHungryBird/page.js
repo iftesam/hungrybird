@@ -286,7 +286,7 @@ export default function WhyHungryBird() {
                     title="The 'Gig Guilt' Tax"
                     reality="You enjoy the convenience, but deep down, you know the driver is scrambling for $3 per order. It feels exploitative because it is."
                     cost="A silent moral tax every time you hit order. You rely on a system that burns out the people serving you."
-                    solution="The $25/hr Standard. We don't tip-bait. We pay a living wage. You aren't ordering a servant; you are hiring a professional."
+                    solution="The Per Loop: $25 Standard. We don't tip-bait. We pay a living wage. You aren't ordering a servant; you are hiring a professional."
                     doodleSrc="/doodles/ethical_standard.png"
                     color={{ bg: "bg-[#6366f1]", card: "bg-indigo-50/50 border-indigo-100", text: "text-indigo-900" }}
                     icon={ShieldCheck}
