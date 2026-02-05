@@ -199,7 +199,8 @@ export const MealCard = ({ meal, type, isSkipped, onSkip, onSwap, onRemove, onAd
                     {/* Highlighted Price & Calories */}
                     <div className={cn("text-right", isSkipped && "line-through text-gray-300 opacity-50")}>
                         <div className="font-bold text-xl text-gray-900 leading-none">${meal.price?.toFixed(2)}</div>
-                        <div className="text-xs font-bold text-emerald-600 mt-1 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
+                        <div className="text-[9px] font-medium text-gray-400 uppercase tracking-wide mt-0.5">incl. tax & fees</div>
+                        <div className="text-xs font-bold text-emerald-600 mt-1.5 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
                             {meal.nutrition?.cals} cals
                         </div>
                     </div>
