@@ -558,13 +558,13 @@ export const LogisticsEngineView = () => {
                                 <div className="col-span-1">
                                     <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Logistics Cost</div>
                                     <div className={`font-mono text-sm ${activeMode === 'green' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        -<NumberTicker value={mode.math.driverCost} prefix="$" color="currentColor" />
+                                        <NumberTicker value={mode.math.driverCost} prefix="$" color="currentColor" />
                                     </div>
                                 </div>
                                 <div className="col-span-1">
                                     <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Food Cost</div>
                                     <div className="text-gray-400 font-mono text-sm">
-                                        -<NumberTicker value={mode.math.foodCost} prefix="$" color="text-gray-400" />
+                                        <NumberTicker value={mode.math.foodCost} prefix="$" color="text-gray-400" />
                                     </div>
                                 </div>
                             </>
