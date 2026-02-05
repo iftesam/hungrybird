@@ -33,7 +33,7 @@ export const SmartAllowance = () => {
         actions.updateFinancials({ monthlyBudget: budget * 30 });
 
         // Auto-Reset logic if budget drops
-        const newMax = budget >= 45 ? 3 : budget >= 30 ? 2 : 1;
+        const newMax = budget >= 60 ? 3 : budget >= 40 ? 2 : 1;
         if (selectedMeals.length > newMax) {
             setSelectedMeals([]);
         }
@@ -62,7 +62,7 @@ export const SmartAllowance = () => {
     };
 
     // Logic
-    const maxMeals = budget >= 45 ? 3 : budget >= 30 ? 2 : 1;
+    const maxMeals = budget >= 60 ? 3 : budget >= 40 ? 2 : 1;
     const isCapped = selectedMeals.length >= maxMeals;
 
     // Buying Power Logic
@@ -94,8 +94,8 @@ export const SmartAllowance = () => {
     ];
 
     // Math for Slider
-    // Range: 15 to 100
-    const MIN = 15;
+    // Range: 20 to 100
+    const MIN = 20;
     const MAX = 100;
     const percent = ((budget - MIN) / (MAX - MIN)) * 100;
 
@@ -117,7 +117,7 @@ export const SmartAllowance = () => {
                 <div className="text-right">
                     <div className={cn(
                         "text-3xl font-bold tracking-tight transition-colors duration-300",
-                        budget >= 45 ? "text-emerald-600" : budget >= 30 ? "text-amber-500" : "text-blue-600"
+                        budget >= 60 ? "text-emerald-600" : budget >= 40 ? "text-amber-500" : "text-blue-600"
                     )}>${budget}</div>
                     <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Daily Cap</div>
                 </div>
@@ -230,18 +230,18 @@ export const SmartAllowance = () => {
                     <div
                         className={cn(
                             "absolute text-[10px] font-bold uppercase tracking-tight -translate-x-1/2 transition-all duration-300",
-                            budget >= 30 ? "text-amber-600 opacity-100" : "text-gray-300 opacity-50"
+                            budget >= 40 ? "text-amber-600 opacity-100" : "text-gray-300 opacity-50"
                         )}
-                        style={{ left: `${((30 - MIN) / (MAX - MIN)) * 100}%` }}
+                        style={{ left: `${((40 - MIN) / (MAX - MIN)) * 100}%` }}
                     >
                         Stage 2
                     </div>
                     <div
                         className={cn(
                             "absolute text-[10px] font-bold uppercase tracking-tight -translate-x-1/2 transition-all duration-300",
-                            budget >= 45 ? "text-emerald-600 opacity-100" : "text-gray-300 opacity-50"
+                            budget >= 60 ? "text-emerald-600 opacity-100" : "text-gray-300 opacity-50"
                         )}
-                        style={{ left: `${((45 - MIN) / (MAX - MIN)) * 100}%` }}
+                        style={{ left: `${((60 - MIN) / (MAX - MIN)) * 100}%` }}
                     >
                         Stage 3
                     </div>
@@ -252,7 +252,7 @@ export const SmartAllowance = () => {
                         <motion.div
                             className={cn(
                                 "absolute h-full transition-colors duration-500",
-                                budget >= 45 ? "bg-emerald-500" : budget >= 30 ? "bg-amber-400" : "bg-blue-500"
+                                budget >= 60 ? "bg-emerald-500" : budget >= 40 ? "bg-amber-400" : "bg-blue-500"
                             )}
                             style={{ width: `${percent}%` }}
                             initial={false}
@@ -261,7 +261,7 @@ export const SmartAllowance = () => {
                         />
                     </div>
 
-                    {[30, 45].map(tick => (
+                    {[40, 60].map(tick => (
                         <div
                             key={tick}
                             className={cn(
@@ -282,14 +282,14 @@ export const SmartAllowance = () => {
                         <div
                             className={cn(
                                 "w-6 h-6 bg-white border-4 rounded-full shadow-lg transition-all duration-300 relative flex items-center justify-center",
-                                budget >= 45 ? "border-emerald-500" : budget >= 30 ? "border-amber-400" : "border-blue-500",
+                                budget >= 60 ? "border-emerald-500" : budget >= 40 ? "border-amber-400" : "border-blue-500",
                                 active ? "scale-125 shadow-xl" : "scale-100 hover:scale-110"
                             )}
                         >
                             {active && (
                                 <div className={cn(
                                     "absolute inset-0 rounded-full animate-ping opacity-25",
-                                    budget >= 45 ? "bg-emerald-500" : budget >= 30 ? "bg-amber-400" : "bg-blue-500"
+                                    budget >= 60 ? "bg-emerald-500" : budget >= 40 ? "bg-amber-400" : "bg-blue-500"
                                 )} />
                             )}
                         </div>
@@ -303,13 +303,13 @@ export const SmartAllowance = () => {
                                 >
                                     <div className={cn(
                                         "text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-2xl whitespace-nowrap transition-colors",
-                                        budget >= 45 ? "bg-emerald-600" : budget >= 30 ? "bg-amber-500" : "bg-blue-600"
+                                        budget >= 60 ? "bg-emerald-600" : budget >= 40 ? "bg-amber-500" : "bg-blue-600"
                                     )}>
                                         ${budget}
                                     </div>
                                     <div className={cn(
                                         "w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] -mt-[1px]",
-                                        budget >= 45 ? "border-t-emerald-600" : budget >= 30 ? "border-t-amber-500" : "border-t-blue-600"
+                                        budget >= 60 ? "border-t-emerald-600" : budget >= 40 ? "border-t-amber-500" : "border-t-blue-600"
                                     )} />
                                 </motion.div>
                             )}
@@ -337,25 +337,25 @@ export const SmartAllowance = () => {
             {/* Smart Helper Text */}
             <div className={cn(
                 "mb-6 p-4 rounded-2xl border transition-all duration-500 flex items-start gap-4",
-                budget >= 45 ? "bg-emerald-50 border-emerald-100" : budget >= 30 ? "bg-amber-50 border-amber-100" : "bg-blue-50 border-blue-100"
+                budget >= 60 ? "bg-emerald-50 border-emerald-100" : budget >= 40 ? "bg-amber-50 border-amber-100" : "bg-blue-50 border-blue-100"
             )}>
                 <div className={cn(
                     "mt-0.5 p-2 rounded-lg transition-colors",
-                    budget >= 45 ? "bg-emerald-100 text-emerald-600" : budget >= 30 ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
+                    budget >= 60 ? "bg-emerald-100 text-emerald-600" : budget >= 40 ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
                 )}>
-                    {budget >= 45 ? <CheckCircle2 className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                    {budget >= 60 ? <CheckCircle2 className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </div>
                 <div className="text-xs leading-relaxed">
                     <span className={cn(
                         "font-bold block mb-1 text-sm",
-                        budget >= 45 ? "text-emerald-900" : budget >= 30 ? "text-amber-900" : "text-blue-900"
+                        budget >= 60 ? "text-emerald-900" : budget >= 40 ? "text-amber-900" : "text-blue-900"
                     )}>
-                        {budget < 30 ? "Discovery Mode" : budget < 45 ? "Comfort Mode" : "Freedom Mode"}
+                        {budget < 40 ? "Discovery Mode" : budget < 60 ? "Comfort Mode" : "Freedom Mode"}
                     </span>
                     <p className="text-gray-600 font-medium">
-                        {budget < 30 && "Enjoy 1 meal daily with smart logistics."}
-                        {budget >= 30 && budget < 45 && "Unlocked 2 meal slots. Balanced fulfillment active."}
-                        {budget >= 45 && "All 3 meal slots unlocked. Maximum variety and luxury."}
+                        {budget < 40 && "Enjoy 1 meal daily with smart logistics."}
+                        {budget >= 40 && budget < 60 && "Unlocked 2 meal slots. Balanced fulfillment active."}
+                        {budget >= 60 && "All 3 meal slots unlocked. Maximum variety and luxury."}
                     </p>
                 </div>
             </div>
@@ -478,10 +478,10 @@ export const SmartAllowance = () => {
                 </div>
 
                 <div className="text-right">
-                    {isCapped && budget < 45 ? (
+                    {isCapped && budget < 60 ? (
                         <div className="text-[11px] text-amber-600 font-bold leading-tight">
-                            Unlock {budget < 30 ? "2nd" : "3rd"} Meal<br />
-                            <span className="font-normal opacity-70">Add ${budget < 30 ? 30 - budget : 45 - budget} to daily limit</span>
+                            Unlock {budget < 40 ? "2nd" : "3rd"} Meal<br />
+                            <span className="font-normal opacity-70">Add ${budget < 40 ? 40 - budget : 60 - budget} to daily limit</span>
                         </div>
                     ) : (
                         <div className="text-xs text-emerald-600 font-bold flex items-center gap-1 justify-end">
