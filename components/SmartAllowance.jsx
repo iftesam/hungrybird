@@ -31,6 +31,7 @@ export const SmartAllowance = () => {
     // Sync to global
     useEffect(() => {
         actions.updateFinancials({ monthlyBudget: budget * 30 });
+        actions.updateProfile({ dailyAllowance: budget }); // Sync to profile for Schedule view
 
         // Auto-Reset logic if budget drops
         const newMax = budget >= 60 ? 3 : budget >= 40 ? 2 : 1;
