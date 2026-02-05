@@ -160,7 +160,7 @@ export const PriorityNotes = () => {
                                 className="relative z-10"
                             >
                                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed pt-1">
-                                    Approvals take &lt; 1 minute.
+                                    Approvals take &lt; 5 seconds.
                                 </p>
                             </motion.div>
                         )}
