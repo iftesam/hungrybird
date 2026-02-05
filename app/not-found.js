@@ -4,8 +4,56 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Home, Calendar, User, Search, ArrowLeft, ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function NotFound() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isRedirecting, setIsRedirecting] = useState(true);
+
+    useEffect(() => {
+        // Define all routes with their canonical casing
+        const routes = [
+            'Logistics',
+            'OrderHistory',
+            'Schedule',
+            'ScheduleDemo',
+            'Settings',
+            'TasteProfile',
+            'WhyHungryBird',
+            'home'
+        ];
+
+        // Extract the first path segment
+        const pathSegments = pathname.split('/').filter(Boolean);
+
+        if (pathSegments.length > 0) {
+            const requestedRoute = pathSegments[0];
+
+            // Find matching route (case-insensitive)
+            const canonicalRoute = routes.find(
+                route => route.toLowerCase() === requestedRoute.toLowerCase()
+            );
+
+            // If found and casing is wrong, redirect immediately
+            if (canonicalRoute && canonicalRoute !== requestedRoute) {
+                const newPathSegments = [canonicalRoute, ...pathSegments.slice(1)];
+                const newPath = '/' + newPathSegments.join('/');
+                router.replace(newPath);
+                // Keep isRedirecting true - don't show 404 page
+                return;
+            }
+        }
+
+        // No redirect needed, show the 404 page
+        setIsRedirecting(false);
+    }, [pathname, router]);
+
+    // Don't render anything while redirecting
+    if (isRedirecting) {
+        return null;
+    }
     return (
         <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center p-6 text-center font-sans">
             <div className="bg-noise" />
