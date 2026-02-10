@@ -76,34 +76,7 @@ const WEEKENDS = ["Sat", "Sun"];
 
 // Default Priority Notes
 // Using static timestamps to avoid hydration errors (server/client mismatch)
-const INITIAL_PRIORITY_NOTES = [
-    {
-        id: 1738467600000, // Static ID
-        text: "Vegan on Tuesdays",
-        status: "approved",
-        createdAt: "2026-02-01T23:00:00.000Z", // Static timestamp
-        expiresAt: "2026-02-08T23:00:00.000Z", // Static expiry (7 days later)
-        durationLabel: "7 Days",
-        tags: {
-            target: "Every Tuesday",
-            cuisine: "Vegan/Vegetarian"
-        },
-        logic: null
-    },
-    {
-        id: 1738467601000, // Static ID
-        text: "I want a spicy beef burger for dinner tomorrow.",
-        status: "approved",
-        createdAt: "2026-02-01T23:00:00.000Z", // Static timestamp
-        expiresAt: "2026-02-04T23:00:00.000Z", // Static expiry (3 days later)
-        durationLabel: "3 Days",
-        tags: {
-            target: "Tomorrow's Dinner",
-            cuisine: "Custom Request"
-        },
-        logic: null
-    }
-];
+const INITIAL_PRIORITY_NOTES = [];
 
 // Populate Schedule
 DAYS.forEach(day => {
