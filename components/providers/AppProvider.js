@@ -79,12 +79,16 @@ const WEEKENDS = ["Sat", "Sun"];
 const INITIAL_PRIORITY_NOTES = [
     {
         id: 1738467600000, // Static ID
-        text: "Get us in Y Combinator!",
-        status: "declined",
+        text: "Vegan on Tuesdays",
+        status: "approved",
         createdAt: "2026-02-01T23:00:00.000Z", // Static timestamp
-        expiresAt: null, // Infinity
-        durationLabel: "Infinity",
-        rejectionReason: "Invalid Request: Please specify a meal-related request. Example: \"I want pizza for dinner\" or \"Give me tacos for lunch tomorrow.\"",
+        expiresAt: "2026-02-08T23:00:00.000Z", // Static expiry (7 days later)
+        durationLabel: "7 Days",
+        tags: {
+            target: "Every Tuesday",
+            cuisine: "Vegan/Vegetarian"
+        },
+        logic: null
     },
     {
         id: 1738467601000, // Static ID
